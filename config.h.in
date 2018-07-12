@@ -1,0 +1,137 @@
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+// Copyright (C) Peter Benner, Martin Koehler, Jens Saak and others
+//               2009-2018
+//
+
+
+
+#ifndef _CONFIG_H
+#define _CONFIG_H
+
+// informations about C-M.E.S.S. and the build
+#define MESS_VERSION                    "${MESS_VERSION}"
+#define MESS_MAJOR_VERSION              ${MESS_MAJOR_VERSION}
+#define MESS_MINOR_VERSION              ${MESS_MINOR_VERSION}
+#define MESS_PATCH_VERSION              ${MESS_PATCH_VERSION}
+#define MESS_GIT_BRANCH                 "${MESS_GIT_BRANCH}"
+#define MESS_GIT_COMMIT_HASH            "${MESS_GIT_COMMIT_HASH}"
+
+#define MESS_CMAKE_VERSION              "${CMAKE_VERSION}"
+#define MESS_CMAKE_C_COMPILER           "${CMAKE_C_COMPILER} (${CMAKE_C_COMPILER_ID}) ${CMAKE_C_COMPILER_VERSION}"
+#define MESS_CMAKE_CXX_COMPILER         "${CMAKE_CXX_COMPILER} (${CMAKE_CXX_COMPILER_ID}) ${CMAKE_CXX_COMPILER_VERSION}"
+#define MESS_CMAKE_Fortran_COMPILER     "${CMAKE_Fortran_COMPILER} (${CMAKE_Fortran_COMPILER_ID}) ${CMAKE_Fortran_COMPILER_VERSION}"
+#define MESS_CMAKE_HOST_SYSTEM          "${CMAKE_HOST_SYSTEM} ${CMAKE_HOST_SYSTEM_PROCESSOR}"
+#define MESS_BLA_VENDOR                 "${BLA_VENDOR}"
+#define MESS_BLAS_LIBRARIES             "${BLAS_LIBRARIES}"
+#define MESS_LAPACK_LIBRARIES           "${LAPACK_LIBRARIES}"
+#define MESS_LIBS                       "${MESS_LIBS}"
+#define MESS_INCLUDE_DIR                "${MESS_INCLUDE_DIR}"
+
+#define MESS_SUITESPARSE_LIBRARIES          "${SUITESPARSE_LIBRARIES}"
+#define MESS_SUITESPARSE_INCLUDE_DIR        "${SUITESPARSE_INCLUDE_DIR}"
+#define MESS_SUPERLU_LIBRARIES              "${SUPERLU_LIBRARIES}"
+#define MESS_SUPERLU_INCLUDE_DIR            "${SUPERLU_INCLUDE_DIR}"
+#define MESS_ARPACK_LIBRARIES               "${ARPACK_LIBRARIES}"
+#define MESS_LIBS                           "${MESS_LIBS}"
+#define MESS_INCLUDE_DIR                    "${MESS_INCLUDE_DIR}"
+#define MESS_CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS}"
+#define MESS_CMAKE_C_FLAGS_DEBUG            "${CMAKE_C_FLAGS_DEBUG}"
+#define MESS_CMAKE_C_FLAGS_RELEASE          "${CMAKE_C_FLAGS_RELEASE}"
+#define MESS_CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS}"
+#define MESS_CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG}"
+#define MESS_CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE}"
+#define MESS_CMAKE_Fortran_FLAGS            "${CMAKE_Fortran_FLAGS}"
+#define MESS_CMAKE_Fortran_FLAGS_DEBUG      "${CMAKE_Fortran_FLAGS_DEBUG}"
+#define MESS_CMAKE_Fortran_FLAGS_RELEASE    "${CMAKE_Fortran_FLAGS_RELEASE}"
+#define MESS_CMAKE_BUILD_TYPE               "${CMAKE_BUILD_TYPE}"
+#define MESS_CONFIG_TIME                    "${MESS_CONFIG_TIME}"
+
+
+
+
+#cmakedefine MESS_HAVE_SIZE_T
+#cmakedefine MESS_HAVE_PTRDIFF_T
+#cmakedefine MESS_HAVE_STRNCMP 1
+#cmakedefine MESS_DEBUG 1
+#cmakedefine MESS_HAVE_ZLIB
+#cmakedefine MESS_HAVE_BZIP2
+#cmakedefine MESS_HAVE_UMFPACK
+#cmakedefine MESS_HAVE_AMD
+#cmakedefine MESS_HAVE_COLAMD
+#cmakedefine MESS_HAVE_CHOLMOD
+#cmakedefine MESS_HAVE_CSPARSE
+#cmakedefine MESS_HAVE_X11
+#cmakedefine MESS_HAVE_XPM
+#cmakedefine MESS_HAVE_INT8T
+#cmakedefine MESS_HAVE_CLOCK_GETTIME
+#cmakedefine MESS_USE_INTEGER8
+#cmakedefine MESS_USE_APPLE_BLAS
+#cmakedefine MESS_USE_OPENBLAS
+#cmakedefine MESS_HAVE_ATTR_CONSTRUCTOR
+#cmakedefine MESS_HAVE_STRNDUP
+#cmakedefine MESS_HAVE_NEARBYINT
+#cmakedefine MESS_HAVE_ISFINITE
+#cmakedefine MESS_HAVE_ARPACK
+#cmakedefine MESS_HAVE_MATIO
+#cmakedefine MESS_HAVE_OPENMP
+#cmakedefine MESS_USE_SUITESPARSE3
+
+// superlu symbols
+#cmakedefine MESS_HAVE_SUPERLU
+#cmakedefine MESS_HAVE_SUPERLU_43
+#cmakedefine MESS_HAVE_SUPERLU_50
+#cmakedefine MESS_HAVE_SUPERLU_MT_30
+#cmakedefine SUPERLU_REFINEMENT_BUG_FIXED
+
+//mklpardiso
+#cmakedefine MESS_HAVE_MKLPARDISO
+#cmakedefine PARDISO_32
+#cmakedefine PARDISO_64
+
+#define LD_MULTIPLICITY ${LD_MULTIPLICITY}
+
+/* MacOS 10.7
+#ifndef MESS_HAVE_INT8T
+ typedef char int8_t;
+#endif
+*/
+
+#ifdef MESS_DEBUG
+#define LOGLEVEL 3
+#else
+#define LOGLEVEL 1
+#endif
+
+#ifndef MESS_HAVE_SIZE_T
+    typedef unsigned long size_t;
+#endif
+
+/*  MacOS 10.7
+#ifndef MESS_HAVE_STRNCMP
+  #define strncmp(a,b,c)  strcmp ((a),(b))
+#endif
+*/
+
+#ifndef MESS_HAVE_PTRDIFF_T
+  typedef long ptrdiff_t;
+#endif
+
+#ifdef MESS_USE_INTEGER8
+    #define MESS64
+#endif
+
+#endif
+

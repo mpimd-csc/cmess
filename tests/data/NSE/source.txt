@@ -1,0 +1,13 @@
+MODEL DESCRIBTION CAN BE FOUND IN
+
+@MastersThesis{Wei10b,
+    author = {H. K. Weichelt},
+    title = {Feedback-{S}tabilisierung von instationären,inkompressiblen {S}trömungen mit {R}iccati-{A}nsatz},
+    school = {Technische Universit\"at Chemnitz},
+    year = {2010},
+    type = {Diplomarbeit},
+    address = {D-09107 Chemnitz},
+    month = {December},
+    note = {\url{http://www.mpi-magdeburg.mpg.de/mpcsc/weichelt/Data/diplomarbeit.pdf}}
+}
+

@@ -1,0 +1,44 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+export BUILD_DIR=obj-$(DEB_BUILD_GNU_TYPE)
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure --builddirectory=$(BUILD_DIR) -- -DARPACK=ON -DMATIO=ON -DTESTS=ON -DTUTORIALS=OFF \
+		-DCMAKE_BUILD_TYPE=Release  -DBLA_VENDOR=Generic  -DDEBIAN_DESTDIR=../debian/tmp \
+		-DX11=OFF -DOPENMP=OFF -DDOC=ON -DDOCPDF=OFF
+
+override_dh_auto_build:
+	dh_auto_build --builddirectory=$(BUILD_DIR)  -- all doc
+
+override_dh_auto_install:
+	dh_auto_install --builddirectory=$(BUILD_DIR)
+	mkdir -p doc/html
+	mkdir -p doc/latex
+	cp -av $(BUILD_DIR)/doc/html/* doc/html
+
+
+override_dh_auto_clean:
+	dh_auto_clean --builddirectory=$(BUILD_DIR)
+	rm -rf doc
+	rm -rf $(BUILD_DIR)
+
+override_dh_clean:
+	dh_clean
+	rm -rf doc
+	rm -rf $(BUILD_DIR)
+
+
+
+override_dh_auto_test:
+	#only basic tests
+	dh_auto_test --builddirectory=$(BUILD_DIR)/tests/matrix
+	#cd $(BUILD_DIR) && ctest -V -R
+	#dh_auto_test --builddirectory=$(BUILD_DIR)
+
+

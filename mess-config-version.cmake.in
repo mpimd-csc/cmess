@@ -1,0 +1,37 @@
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (C) Peter Benner, Martin Koehler, Jens Saak and others
+#               2009-2018
+#
+
+
+
+
+set(PACKAGE_VERSION "@MESS_VERSION@")
+set(PACKAGE_VERSION_MAJOR "@MESS_MAJOR_VERSION@")
+set(PACKAGE_VERSION_MINOR "@MESS_MINOR_VERSION@")
+set(PACKAGE_VERSION_PATCH "@MESS_PATCH_VERSION@")
+
+# This version is compatible only with matching major.minor versions.
+if ("${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}" VERSION_EQUAL "${PACKAGE_FIND_VERSION_MAJOR}.${PACKAGE_FIND_VERSION_MINOR}")
+ # This version is compatible with equal or lesser patch versions.
+    if (NOT "${PACKAGE_VERSION_PATCH}" VERSION_LESS "${PACKAGE_FIND_VERSION_PATCH}")
+        set(PACKAGE_VERSION_COMPATIBLE 1)
+      if ("${PACKAGE_VERSION_PATCH}" VERSION_EQUAL "${PACKAGE_FIND_VERSION_PATCH}")
+            set(PACKAGE_VERSION_EXACT 1)
+      endif()
+    endif()
+endif()
+

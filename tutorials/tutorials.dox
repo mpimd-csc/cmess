@@ -1,0 +1,83 @@
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+// Copyright (C) Peter Benner, Martin Koehler, Jens Saak and others
+//               2009-2018
+//
+
+/**
+\page  tutorials Tutorials
+
+ In this section we have tutorials for the following applications:
+ <center>
+ |          File                            | Description                                                                   |
+ |:----------------------------------------:|:-----------------------------------------------------------------------------:|
+ | tutorial_matrix_operations.c             | show basic algebraic matrix operations                                        |
+ | tutorial_direct_solvers.c                | show how to solve a linear system of equations                                |
+ | tutorial_lyap.c                          | using @ref mess_lyap to solve a (generalized) Lyapunov Equation               |
+ | tutorial_care.c                          | using @ref mess_care to solve a (generalized) Riccati Equation                |
+ | tutorial_lradi.c                         | using @ref mess_lradi to solve a (generalized) Lyapunov Equation              |
+ | tutorial_lrnm.c                          | using @ref mess_lrnm to solve a (generalized) Riccati Equation                |
+ | tutorial_bt.c                            | using @ref mess_bt_lrsrm to reduce a LTI-System                               |
+ | tutorial_plot.c                          | using @ref mess_plotExport instance to generate and export plots              |
+ | tutorial_spy.c                           | using @ref mess_matrix_spy to plot the sparsity pattern of a matrix           |
+ | tutorial_eig.c                           | compute and plot eigenvalues and singular values of a dense matrix            |
+ | tutorial_sign.c                          | using @ref mess_eigen_sign to compute the sign function of a matrix           |
+ | tutorial_sylvester.c                     | Solving standard or generalized sparse-dense Sylvester equations.             |
+
+ </center>
+
+Further examples for balanced trunctation:
+<center>
+ |          File                            | Description                                                                                                           |
+ |:----------------------------------------:|:---------------------------------------------------------------------------------------------------------------------:|
+ | tutorial_bt_gglrsrm.c                    | reduce a first order generalized LTI system using low-rank square root balanced trunction                             |
+ | tutorial_bt_gslrsrm.c                    | reduce a first order generalized LTI to a first order LTI system using low-rank square root balanced trunction        |
+ | tutorial_bt_lrsrm.c                      | reduce a first order LTI to a first order LTI system using low-rank square root balanced trunction                    |
+ | tutorial_bt_lrsrm_somor.c                | reduce a second order LTI to a first order LTI system using low-rank square root balanced trunction                   |
+ | tutorial_bt_lrsrm_somor_so.c             | reduce a second order LTI to a second order LTI system using low-rank square root balanced trunction                  |
+ </center>
+
+Further examples for eigenvalue computations:
+<center>
+ |          File                            | Description                                                                                                           |
+ |:----------------------------------------:|:---------------------------------------------------------------------------------------------------------------------:|
+ | tutorial_eig.c                           | show dense eigenvalue computations using @ref mess_eigen_eig                                                          |
+ | tutorial_eigs.c                          | show sparse eigenvalue computations using @ref mess_eigen_eigs and @arpack interface                                  |
+ | tutorial_gschur.c                        | show generalized schur computation using @ref mess_eigen_gschur @ref mess_eigen_gschur_complex                        |
+ | tutorial_schur.c                         | using @ref mess_eigen_schur and @ref mess_eigen_schur_complex to compute schur decomposition                          |
+
+</center>
+
+Further examples for miscallenous examples:
+<center>
+ |          File                            | Description                                                                   |
+ |:----------------------------------------:|:-----------------------------------------------------------------------------:|
+ | tutorial_vector_read.c                   | generate a random vector and read and write operations                        |
+ | tutorial_norms.c                         | compute different matrix norms                                                |
+ | tutorial_it_unsym.c                      | usage of iterative solvers                                                    |
+ | tutorial_gen_fdm_cd.c                    | convection diffusion matrix generation                                        |
+ | tutorial_gen_laplace.c                   | discrete laplace operator matrix generation                                   |
+ | tutorial_h2norm.c                        | compute the \f$ \mathcal{H}_2\f$ Norm                                         |
+ | tutorial_irka_biorth.c                   | \f$ \mathcal{H}_2 \f$ model order reduction via irka algorithm                |
+ | tutorial_tsia.c                          | \f$ \mathcal{H}_2 \f$ model order reduction via tsia algorithm                |
+ | tutorial_backslash.c                     | solve a linear system using @ref mess_matrix_backslash                        |
+ | tutorial_lrnm-g.c                        | solve a algebraic riccati equation and show stepfunction application          |
+ | tutorial_qr.c                            | solve a linear system using @ref mess_direct_create_lapack_qr                 |
+ </center>
+
+
+
+
+*/

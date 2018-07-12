@@ -1,0 +1,26 @@
+EXAMPLES TAKEN FROM: https://sites.google.com/site/rommes/software
+FILE: ww_vref_6405.mat
+
+The matrices are exported with the following MATLAB script:
+
+
+load('ww_vref_6405.mat');
+p = find(diag(E));
+np = find(diag(E) == 0);
+pp = [p;np];
+E11 = E(p,p);
+A11 = A(p,p);
+A12 = A(p,np);
+A21 = A(np,p);
+A22 = A(np,np);
+B   = b(pp, :);
+C   = c( pp,:)';
+
+%% write matrices
+mmwrite('E11.mtx',E11);
+mmwrite('A11.mtx',A11);
+mmwrite('A12.mtx',A12);
+mmwrite('A21.mtx',A21);
+mmwrite('A22.mtx',A22);
+mmwrite('B.mtx',B);
+mmwrite('C.mtx',C);

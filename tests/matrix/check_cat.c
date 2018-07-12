@@ -1,0 +1,763 @@
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+// Copyright (C) Peter Benner, Martin Koehler, Jens Saak and others
+//               2009-2018
+//
+
+/**
+ * @addtogroup test_matrix
+ * @{
+ * @file tests/matrix/check_cat.c
+ * @brief Check the concatenation of two matrices.
+ * @author @koehlerm
+ * @test
+ * This function checks if the @ref mess_matrix_cat function defined in cat.c, that means it checks if the concatenation
+ * \f[ O= \left[
+ *     \begin{array}{c|c}
+ *           A & B \\
+ *     \hline
+ *           C & D
+ *     \end{array}
+ *     \right] \f]
+ * works correctly for given matrices \f$ A, B, C \f$ and \f$ D \f$.
+ * @}
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <complex.h>
+#include "mess/mess.h"
+
+#include "../call_macro.h"
+#define  CALL2(X) ret = (X); tests++; if ( ret == 1) { err ++; fprintf(stderr,"================  test %35s failed =================\n", #X);  } else {fprintf(stderr, "test %35s passed.\n",#X);  }
+
+
+/*-----------------------------------------------------------------------------
+ *  Test data
+ *-----------------------------------------------------------------------------*/
+double data_A[9] = { 11,21,31,12,22,32,13,23,33};
+double data_B[9] = { 14,24,34,15,25,35,16,26,36};
+double data_C[9] = { 41,51,61,42,52,62,43,53,63};
+double data_D[9] = { 44,54,64,45,55,65,46,56,66};
+
+/*-----------------------------------------------------------------------------
+ *  Results
+ *-----------------------------------------------------------------------------*/
+double data_AB[18] = { 1.100000e+01,2.100000e+01,3.100000e+01,1.200000e+01,2.200000e+01,3.200000e+01,1.300000e+01,2.300000e+01,3.300000e+01,1.400000e+01,2.400000e+01,3.400000e+01,1.500000e+01,2.500000e+01,3.500000e+01,1.600000e+01,2.600000e+01,3.600000e+01};
+double data_AC[18] = { 1.100000e+01,2.100000e+01,3.100000e+01,4.100000e+01,5.100000e+01,6.100000e+01,1.200000e+01,2.200000e+01,3.200000e+01,4.200000e+01,5.200000e+01,6.200000e+01,1.300000e+01,2.300000e+01,3.300000e+01,4.300000e+01,5.300000e+01,6.300000e+01};
+double data_AD[36] = { 1.100000000000000e+01, 2.100000000000000e+01, 3.100000000000000e+01, 0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00, 1.200000000000000e+01, 2.200000000000000e+01, 3.200000000000000e+01, 0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00, 1.300000000000000e+01, 2.300000000000000e+01, 3.300000000000000e+01, 0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00, 4.400000000000000e+01, 5.400000000000000e+01, 6.400000000000000e+01, 0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00, 4.500000000000000e+01, 5.500000000000000e+01, 6.500000000000000e+01,0.000000000000000e+00,0.000000000000000e+00,0.000000000000000e+00,4.600000000000000e+01,5.600000000000000e+01,6.600000000000000e+01};
+double data_BC[36] = {  0,0,0,41,51,61,0,0,0,42,52,62,0,0,0,43,53,63,14,24,34,0,0,0,15,25,35,0,0,0,16,26,36,0,0,0};
+double data_ABC[36] ={1.100000000000000e+01,2.100000000000000e+01,3.100000000000000e+01,4.100000000000000e+01,5.100000000000000e+01,6.100000000000000e+01,1.200000000000000e+01,2.200000000000000e+01,3.200000000000000e+01,4.200000000000000e+01,5.200000000000000e+01,6.200000000000000e+01,1.300000000000000e+01,2.300000000000000e+01,3.300000000000000e+01,4.300000000000000e+01,5.300000000000000e+01,6.300000000000000e+01,1.400000000000000e+01,2.400000000000000e+01,3.400000000000000e+01,0.000000000000000e+00,0.000000000000000e+00,0.000000000000000e+00,1.500000000000000e+01,2.500000000000000e+01,3.500000000000000e+01,0.000000000000000e+00,0.000000000000000e+00,0.000000000000000e+00,1.600000000000000e+01,2.600000000000000e+01,3.600000000000000e+01,0.000000000000000e+00,0.000000000000000e+00,0.000000000000000e+00};
+double data_ACD[36] ={ 1.100000000000000e+01, 2.100000000000000e+01, 3.100000000000000e+01, 4.100000000000000e+01, 5.100000000000000e+01, 6.100000000000000e+01, 1.200000000000000e+01, 2.200000000000000e+01, 3.200000000000000e+01, 4.200000000000000e+01, 5.200000000000000e+01, 6.200000000000000e+01, 1.300000000000000e+01, 2.300000000000000e+01, 3.300000000000000e+01, 4.300000000000000e+01, 5.300000000000000e+01, 6.300000000000000e+01, 0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00, 4.400000000000000e+01, 5.400000000000000e+01, 6.400000000000000e+01, 0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00, 4.500000000000000e+01,5.500000000000000e+01,6.500000000000000e+01,0.000000000000000e+00,0.000000000000000e+00,0.000000000000000e+00,4.600000000000000e+01,5.600000000000000e+01,6.600000000000000e+01};
+
+double data_ABD[36] = {1.100000000000000e+01,2.100000000000000e+01,3.100000000000000e+01,0.000000000000000e+00,0.000000000000000e+00,0.000000000000000e+00,1.200000000000000e+01,2.200000000000000e+01,3.200000000000000e+01,0.000000000000000e+00,0.000000000000000e+00,0.000000000000000e+00,1.300000000000000e+01,2.300000000000000e+01,3.300000000000000e+01,0.000000000000000e+00,0.000000000000000e+00,0.000000000000000e+00,1.400000000000000e+01,2.400000000000000e+01,3.400000000000000e+01,4.400000000000000e+01,5.400000000000000e+01,6.400000000000000e+01,1.500000000000000e+01,2.500000000000000e+01,3.500000000000000e+01,4.500000000000000e+01,5.500000000000000e+01,6.500000000000000e+01,1.600000000000000e+01,2.600000000000000e+01,3.600000000000000e+01,4.600000000000000e+01,5.600000000000000e+01,6.600000000000000e+01};
+
+double data_BCD[36] = {0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00, 4.100000000000000e+01, 5.100000000000000e+01, 6.100000000000000e+01, 0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00, 4.200000000000000e+01, 5.200000000000000e+01, 6.200000000000000e+01, 0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00, 4.300000000000000e+01, 5.300000000000000e+01, 6.300000000000000e+01, 1.400000000000000e+01, 2.400000000000000e+01, 3.400000000000000e+01, 4.400000000000000e+01, 5.400000000000000e+01, 6.400000000000000e+01, 1.500000000000000e+01, 2.500000000000000e+01, 3.500000000000000e+01, 4.500000000000000e+01, 5.500000000000000e+01, 6.500000000000000e+01, 1.600000000000000e+01, 2.600000000000000e+01, 3.600000000000000e+01, 4.600000000000000e+01,5.600000000000000e+01,6.600000000000000e+01};
+
+double data_ABCD[36]={1.100000e+01, 2.100000e+01, 3.100000e+01, 4.100000e+01, 5.100000e+01, 6.100000e+01, 1.200000e+01, 2.200000e+01, 3.200000e+01, 4.200000e+01, 5.200000e+01, 6.200000e+01, 1.300000e+01, 2.300000e+01, 3.300000e+01, 4.300000e+01, 5.300000e+01, 6.300000e+01, 1.400000e+01, 2.400000e+01, 3.400000e+01, 4.400000e+01, 5.400000e+01, 6.400000e+01, 1.500000e+01, 2.500000e+01, 3.500000e+01, 4.500000e+01, 5.500000e+01, 6.500000e+01, 1.600000e+01, 2.600000e+01, 3.600000e+01, 4.600000e+01, 5.600000e+01, 6.600000e+01};
+
+
+int check_cat(  mess_matrix A, mess_storage_t  storeA,
+        mess_matrix B, mess_storage_t  storeB,
+        mess_matrix C, mess_storage_t  storeC,
+        mess_matrix D, mess_storage_t  storeD,
+        mess_storage_t  outtype,
+        mess_matrix ref){
+    mess_matrix O;
+    mess_matrix iA,iB,iC,iD;
+    int ret;
+    double res;
+    double eps = mess_eps();
+
+    CALL(mess_matrix_init(&O));
+    if ( A!= NULL ) { CALL(mess_matrix_init(&iA)); } else {iA=NULL;}
+    if ( B!= NULL ) { CALL(mess_matrix_init(&iB)); } else {iB=NULL;}
+    if ( C!= NULL ) { CALL(mess_matrix_init(&iC)); } else {iC=NULL;}
+    if ( D!= NULL ) { CALL(mess_matrix_init(&iD)); } else {iD=NULL;}
+
+    if ( A!=NULL) { CALL(mess_matrix_convert(A,iA,storeA)); }
+    if ( B!=NULL) { CALL(mess_matrix_convert(B,iB,storeB)); }
+    if ( C!=NULL) { CALL(mess_matrix_convert(C,iC,storeC)); }
+    if ( D!=NULL) { CALL(mess_matrix_convert(D,iD,storeD)); }
+
+    CALL(mess_matrix_cat(iA,iB,iC,iD,outtype,O));
+    CALL(mess_matrix_diffnorm(O,ref, &res));
+
+    if ( res > 10 * eps) {
+        fprintf(stderr,"->res = %lg\n", res);
+        mess_matrix_print(O);
+        mess_matrix_clear(&O);
+        if(iA) mess_matrix_clear(&iA);
+        if(iB) mess_matrix_clear(&iB);
+        if(iC) mess_matrix_clear(&iC);
+        if(iD) mess_matrix_clear(&iD);
+        return 1;
+    }
+    else {
+        mess_matrix_clear(&O);
+        if(iA) mess_matrix_clear(&iA);
+        if(iB) mess_matrix_clear(&iB);
+        if(iC) mess_matrix_clear(&iC);
+        if(iD) mess_matrix_clear(&iD);
+        return 0;
+    }
+}
+
+
+
+int main (int argc, char **argv){
+
+    mess_init();
+    int ret;
+    int err = 0;
+    int tests=0;
+    mess_matrix A,B,C,D;
+    mess_matrix refAB,refAC,refAD,refBC;
+    mess_matrix refABC, refABD, refACD, refBCD;
+    mess_matrix refABCD;
+
+
+    CALL(mess_matrix_init(&A));
+    CALL(mess_matrix_init(&B));
+    CALL(mess_matrix_init(&C));
+    CALL(mess_matrix_init(&D));
+    CALL(mess_matrix_init(&refAB));
+    CALL(mess_matrix_init(&refAC));
+    CALL(mess_matrix_init(&refAD));
+    CALL(mess_matrix_init(&refBC));
+    CALL(mess_matrix_init(&refABC));
+    CALL(mess_matrix_init(&refACD));
+    CALL(mess_matrix_init(&refABD));
+    CALL(mess_matrix_init(&refBCD));
+    CALL(mess_matrix_init(&refABCD));
+
+
+
+    mess_error_level=1;
+    /*-----------------------------------------------------------------------------
+     *  Load matrices
+     *-----------------------------------------------------------------------------*/
+    CALL(mess_matrix_dense_from_farray(A,3,3,0,data_A,NULL));
+    CALL(mess_matrix_dense_from_farray(B,3,3,0,data_B,NULL));
+    CALL(mess_matrix_dense_from_farray(C,3,3,0,data_C,NULL));
+    CALL(mess_matrix_dense_from_farray(D,3,3,0,data_D,NULL));
+
+    if ( argc > 1 ) {
+        unsigned char cpx = (unsigned char) atoi(argv[1]);
+        if ( cpx & 0x01 ) {
+            CALL(mess_matrix_tocomplex(A));
+        }
+        if ( cpx & 0x02 ) {
+            CALL(mess_matrix_tocomplex(B));
+        }
+        if ( cpx & 0x04 ) {
+            CALL(mess_matrix_tocomplex(C));
+        }
+        if ( cpx & 0x08 ) {
+            CALL(mess_matrix_tocomplex(D));
+        }
+    }
+
+
+    /*-----------------------------------------------------------------------------
+     *  Load results
+     *-----------------------------------------------------------------------------*/
+    CALL(mess_matrix_dense_from_farray(refAB,3,6,0,data_AB,NULL));
+    CALL(mess_matrix_dense_from_farray(refAC,6,3,0,data_AC,NULL));
+    CALL(mess_matrix_dense_from_farray(refAD,6,6,0,data_AD,NULL));
+    CALL(mess_matrix_dense_from_farray(refBC,6,6,0,data_BC,NULL));
+    CALL(mess_matrix_dense_from_farray(refABC,6,6,0,data_ABC,NULL));
+    CALL(mess_matrix_dense_from_farray(refACD,6,6,0,data_ACD,NULL));
+    CALL(mess_matrix_dense_from_farray(refABD,6,6,0,data_ABD,NULL));
+    CALL(mess_matrix_dense_from_farray(refBCD,6,6,0,data_BCD,NULL));
+    CALL(mess_matrix_dense_from_farray(refABCD,6,6,0,data_ABCD,NULL));
+
+    /*-----------------------------------------------------------------------------
+     *  Only BLOCK A
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,A));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR,A));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC,A));
+    CALL2(check_cat(A,MESS_CSR,NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,A));
+    CALL2(check_cat(A,MESS_CSR,NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR,A));
+    CALL2(check_cat(A,MESS_CSR,NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC,A));
+    CALL2(check_cat(A,MESS_CSC,NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,A));
+    CALL2(check_cat(A,MESS_CSC,NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR,A));
+    CALL2(check_cat(A,MESS_CSC,NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC,A));
+
+    /*-----------------------------------------------------------------------------
+     *  Only BLOCK B
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(NULL,MESS_DENSE, B,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,B));
+    CALL2(check_cat(NULL,MESS_DENSE, B,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR,B));
+    CALL2(check_cat(NULL,MESS_DENSE, B,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC,B));
+    CALL2(check_cat(NULL,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,B));
+    CALL2(check_cat(NULL,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR,B));
+    CALL2(check_cat(NULL,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC,B));
+    CALL2(check_cat(NULL,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,B));
+    CALL2(check_cat(NULL,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR,B));
+    CALL2(check_cat(NULL,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC,B));
+
+    /*-----------------------------------------------------------------------------
+     *  Only BLOCK C
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE, C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,C));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE, C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR,C));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE, C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC,C));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE, C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,C));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE, C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR,C));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE, C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC,C));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE, C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,C));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE, C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR,C));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE, C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC,C));
+    /*-----------------------------------------------------------------------------
+     *  Only BLOCK D
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_DENSE,MESS_DENSE,D));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_DENSE,MESS_CSR,D));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_DENSE,MESS_CSC,D));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSR  ,MESS_DENSE,D));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSR  ,MESS_CSR,D));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSR  ,MESS_CSC,D));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSC  ,MESS_DENSE,D));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSC  ,MESS_CSR,D));
+    CALL2(check_cat(NULL,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSC  ,MESS_CSC,D));
+
+    /*-----------------------------------------------------------------------------
+     *  BLOCK A and B
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refAB));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refAB));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refAB));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refAB));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refAB));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refAB));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refAB));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refAB));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refAB));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refAB));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refAB));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refAB));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refAB));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refAB));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refAB));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refAB));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refAB));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refAB));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refAB));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refAB));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refAB));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refAB));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refAB));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refAB));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refAB));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refAB));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,NULL,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refAB));
+
+
+    /*-----------------------------------------------------------------------------
+     *  Block A and C
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE, C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refAC));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE, C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refAC));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE, C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refAC));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE, C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,refAC));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE, C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR  ,refAC));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE, C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC  ,refAC));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE, C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,refAC));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE, C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR  ,refAC));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE, C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC  ,refAC));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE, C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refAC));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE, C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refAC));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE, C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refAC));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE, C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,refAC));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE, C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR  ,refAC));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE, C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC  ,refAC));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE, C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,refAC));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE, C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR  ,refAC));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE, C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC  ,refAC));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE, C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refAC));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE, C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refAC));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE, C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refAC));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE, C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,refAC));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE, C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR  ,refAC));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE, C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC  ,refAC));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE, C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,refAC));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE, C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR  ,refAC));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE, C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC  ,refAC));
+
+    /*-----------------------------------------------------------------------------
+     *  Block A and D
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_DENSE,MESS_DENSE,refAD));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_DENSE,MESS_CSR  ,refAD));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_DENSE,MESS_CSC  ,refAD));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSR  ,MESS_DENSE,refAD));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSR  ,MESS_CSR  ,refAD));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSR  ,MESS_CSC  ,refAD));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSC  ,MESS_DENSE,refAD));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSC  ,MESS_CSR  ,refAD));
+    CALL2(check_cat(A,MESS_DENSE, NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSC  ,MESS_CSC  ,refAD));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_DENSE,MESS_DENSE,refAD));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_DENSE,MESS_CSR  ,refAD));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_DENSE,MESS_CSC  ,refAD));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSR  ,MESS_DENSE,refAD));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSR  ,MESS_CSR  ,refAD));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSR  ,MESS_CSC  ,refAD));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSC  ,MESS_DENSE,refAD));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSC  ,MESS_CSR  ,refAD));
+    CALL2(check_cat(A,MESS_CSR  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSC  ,MESS_CSC  ,refAD));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_DENSE,MESS_DENSE,refAD));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_DENSE,MESS_CSR  ,refAD));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_DENSE,MESS_CSC  ,refAD));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSR  ,MESS_DENSE,refAD));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSR  ,MESS_CSR  ,refAD));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSR  ,MESS_CSC  ,refAD));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSC  ,MESS_DENSE,refAD));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSC  ,MESS_CSR  ,refAD));
+    CALL2(check_cat(A,MESS_CSC  , NULL,MESS_DENSE,NULL,MESS_DENSE, D,MESS_CSC  ,MESS_CSC  ,refAD));
+
+    /*-----------------------------------------------------------------------------
+     *  Block B and C
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_DENSE, NULL,MESS_DENSE,MESS_DENSE,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_DENSE, NULL,MESS_DENSE,MESS_CSR  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_DENSE, NULL,MESS_DENSE,MESS_CSC  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSR  , NULL,MESS_DENSE,MESS_DENSE,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSR  , NULL,MESS_DENSE,MESS_CSR  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSR  , NULL,MESS_DENSE,MESS_CSC  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSC  , NULL,MESS_DENSE,MESS_DENSE,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSC  , NULL,MESS_DENSE,MESS_CSR  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSC  , NULL,MESS_DENSE,MESS_CSC  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_DENSE, NULL,MESS_DENSE,MESS_DENSE,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_DENSE, NULL,MESS_DENSE,MESS_CSR  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_DENSE, NULL,MESS_DENSE,MESS_CSC  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSR  , NULL,MESS_DENSE,MESS_DENSE,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSR  , NULL,MESS_DENSE,MESS_CSR  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSR  , NULL,MESS_DENSE,MESS_CSC  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSC  , NULL,MESS_DENSE,MESS_DENSE,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSC  , NULL,MESS_DENSE,MESS_CSR  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSC  , NULL,MESS_DENSE,MESS_CSC  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_DENSE, NULL,MESS_DENSE,MESS_DENSE,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_DENSE, NULL,MESS_DENSE,MESS_CSR  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_DENSE, NULL,MESS_DENSE,MESS_CSC  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSR  , NULL,MESS_DENSE,MESS_DENSE,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSR  , NULL,MESS_DENSE,MESS_CSR  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSR  , NULL,MESS_DENSE,MESS_CSC  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSC  , NULL,MESS_DENSE,MESS_DENSE,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSC  , NULL,MESS_DENSE,MESS_CSR  ,refBC));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSC  , NULL,MESS_DENSE,MESS_CSC  ,refBC));
+
+    /*-----------------------------------------------------------------------------
+     *  Block A,B,C
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,C,MESS_DENSE,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,C,MESS_CSR  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_DENSE,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSR  ,refABC));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,C,MESS_CSC  ,NULL,MESS_DENSE,MESS_CSC  ,refABC));
+
+    /*-----------------------------------------------------------------------------
+     *  Block A,B,D
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,NULL,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,NULL,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,NULL,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,NULL,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABD));
+
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,NULL,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refABD));
+
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refABD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,NULL,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refABD));
+
+    /*-----------------------------------------------------------------------------
+     *  Block A,C,D
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_DENSE,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_DENSE,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_DENSE,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_DENSE,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_DENSE,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_DENSE,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_DENSE,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_DENSE,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_DENSE,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_DENSE,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_DENSE,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_DENSE,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_DENSE,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_DENSE,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_DENSE,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_DENSE,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_DENSE,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_DENSE,MESS_CSC  ,refACD));
+
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSR  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSR  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSR  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSR  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSR  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSR  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSR  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSR  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSR  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSR  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSR  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSR  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSR  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSR  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSR  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSR  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSR  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSR  ,MESS_CSC  ,refACD));
+
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSC  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSC  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSC  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSC  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSC  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSC  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_DENSE,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSC  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSC  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSC  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSC  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSC  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSC  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSR  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSC  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSC  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_DENSE,D,MESS_CSC  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSC  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSC  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSC  ,MESS_CSC  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refACD));
+    CALL2(check_cat(A,MESS_CSC  ,NULL,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refACD));
+
+    /*-----------------------------------------------------------------------------
+     *  Block B,C,D
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSR  ,D,MESS_DENSE,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSR  ,D,MESS_DENSE,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSR  ,D,MESS_DENSE,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSC  ,D,MESS_DENSE,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSC  ,D,MESS_DENSE,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSC  ,D,MESS_DENSE,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSR  ,D,MESS_DENSE,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSR  ,D,MESS_DENSE,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSR  ,D,MESS_DENSE,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSC  ,D,MESS_DENSE,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSC  ,D,MESS_DENSE,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSC  ,D,MESS_DENSE,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSR  ,D,MESS_DENSE,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSR  ,D,MESS_DENSE,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSR  ,D,MESS_DENSE,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSC  ,D,MESS_DENSE,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSC  ,D,MESS_DENSE,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSC  ,D,MESS_DENSE,MESS_CSC  ,refBCD));
+
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_DENSE,D,MESS_CSR  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_DENSE,D,MESS_CSR  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_DENSE,D,MESS_CSR  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSR  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSR  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSR  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_DENSE,D,MESS_CSR  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_DENSE,D,MESS_CSR  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_DENSE,D,MESS_CSR  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSC  ,D,MESS_CSR  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSC  ,D,MESS_CSR  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSC  ,D,MESS_CSR  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_DENSE,D,MESS_CSR  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_DENSE,D,MESS_CSR  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_DENSE,D,MESS_CSR  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSR  ,D,MESS_CSR  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSR  ,D,MESS_CSR  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSR  ,D,MESS_CSR  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSC  ,D,MESS_CSR  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSC  ,D,MESS_CSR  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSC  ,D,MESS_CSR  ,MESS_CSC  ,refBCD));
+
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_DENSE,D,MESS_CSC  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_DENSE,D,MESS_CSC  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_DENSE,D,MESS_CSC  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSC  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSC  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSR  ,D,MESS_CSC  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_DENSE,C,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_DENSE,D,MESS_CSC  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_DENSE,D,MESS_CSC  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_DENSE,D,MESS_CSC  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSR  ,D,MESS_CSC  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSR  ,D,MESS_CSC  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSR  ,D,MESS_CSC  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSR  ,C,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_DENSE,D,MESS_CSC  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_DENSE,D,MESS_CSC  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_DENSE,D,MESS_CSC  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSR  ,D,MESS_CSC  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSR  ,D,MESS_CSC  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSR  ,D,MESS_CSC  ,MESS_CSC  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSC  ,D,MESS_CSC  ,MESS_DENSE,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSC  ,D,MESS_CSC  ,MESS_CSR  ,refBCD));
+    CALL2(check_cat(NULL,MESS_DENSE,B,MESS_CSC  ,C,MESS_CSC  ,D,MESS_CSC  ,MESS_CSC  ,refBCD));
+
+
+    /*-----------------------------------------------------------------------------
+     *  Check Full CAT
+     *-----------------------------------------------------------------------------*/
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABCD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABCD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABCD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABCD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABCD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSR  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABCD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABCD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABCD));
+    CALL2(check_cat(A,MESS_DENSE, B,MESS_CSC  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABCD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABCD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABCD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABCD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABCD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABCD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSR  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABCD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABCD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABCD));
+    CALL2(check_cat(A,MESS_CSR  , B,MESS_CSC  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABCD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABCD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABCD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_DENSE,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABCD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABCD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABCD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSR  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABCD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,C,MESS_DENSE,D,MESS_DENSE,MESS_DENSE,refABCD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSR  ,refABCD));
+    CALL2(check_cat(A,MESS_CSC  , B,MESS_CSC  ,C,MESS_DENSE,D,MESS_DENSE,MESS_CSC  ,refABCD));
+
+
+    fprintf(stderr," %d of %d tests passed.\nfailed: %d\n ",  tests-err,tests,err);
+
+
+    mess_matrix_clear(&A);
+    mess_matrix_clear(&B);
+    mess_matrix_clear(&C);
+    mess_matrix_clear(&D);
+    mess_matrix_clear(&refAB);
+    mess_matrix_clear(&refAC);
+    mess_matrix_clear(&refAD);
+    mess_matrix_clear(&refBC);
+    mess_matrix_clear(&refABC);
+    mess_matrix_clear(&refACD);
+    mess_matrix_clear(&refABD);
+    mess_matrix_clear(&refBCD);
+    mess_matrix_clear(&refABCD);
+
+    return (err>0)?(1):(0);
+}
+

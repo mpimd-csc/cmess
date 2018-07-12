@@ -1,0 +1,2 @@
+EXAMPLES TAKEN FROM: http://slicot.org/20-site/126-benchmark-examples-for-model-reduction
+FILE: heat-cont.mat

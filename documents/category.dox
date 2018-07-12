@@ -1,0 +1,1465 @@
+/**
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup general  General Type Definitions and Macros
+@brief This section contains all generic macros and type definitions.
+
+One of the important ones
+are the @ref mess_int_t type definition. Per default this point to a normal \c int integer. If @mess
+is configured for 64 Bit integers, i.e. @c MESS64 is set to during the configure step, the @ref mess_int_t type
+points to @c long or @c int64_t.
+
+Another important data type is the @ref mess_operation_t enumeration. It defines how routines  like @ref mess_matrix_mvp
+or @ref mess_matrix_multiply operate .
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup matrix Matrix Operations
+@brief This section contains all matrix related operations.
+
+This includes the management of the @ref mess_matrix
+data structure, modifying the structure of the @ref mess_matrix and arithmetic operations.  Additionally it includes
+an input/output interface to read and write @mm files.
+
+Matrices are represented as an instance of a \ref mess_matrix object. Before they can be used the first time
+they must be initialized using \ref mess_matrix_init and destroyed afterwards using \ref mess_matrix_clear.
+\code{.c}
+ mess_matrix A;
+ mess_matrix_init(&A);
+ // do some stuff with A
+ mess_matrix_clear(&A);
+\endcode
+
+A \ref mess_matrix can handle real and complex matrices and the following storage formats:
+<ul>
+<li> Dense (Fortran) storage (@ref MESS_DENSE)
+<li> Compressed Sparse Row storage (@ref MESS_CSR)
+<li> Compressed Sparse Column storage (@ref MESS_CSC)
+<li> Coordinate storage (@ref MESS_COORD)
+</ul>
+Most functions can handle all of them or if not convert them automatically to the desired format. If such an automatic
+convertation is done a warning is displayed to the standard error ouput. Functions that need a internal copy of the
+matrix copy them to the right format as well without such a warning. This can cause memory problems when you pass a
+dense matrix to the SVD or a eigenvalue solver. You can convert matrices between all formats using the
+\ref mess_matrix_convert function.
+
+Matrices can be created by loading them from a @mm file using \ref mess_matrix_read or
+\ref mess_matrix_read_formated. Otherwise they can be created out of the corresponding data structures using
+\ref mess_matrix_dense_from_farray, \ref mess_matrix_dense_from_carray, \ref mess_matrix_csr, \ref mess_matrix_csc or
+\ref mess_matrix_coord. A not recommended element-wise access is possible using \ref mess_matrix_getelement,
+\ref mess_matrix_setelement and \ref mess_matrix_setelement_complex. Otherwise you can access the elements in
+\ref mess_matrix directly but keep in mind that this structure can change sometimes.
+
+Beside normal matrix operations like the matrix-vector product, there exists many operation that work on matrix columns.
+They are available in the \ref matrix_col section.
+@sa matrix_op
+@sa matrix_col
+@sa matrix_norm
+@sa matrix_data
+@sa matrix_io
+@sa matrix_misc
+@sa matrix_ds
+@sa matgen
+
+
+*********************************************************************************************************************
+@defgroup matrix_op Arithmetic Operations on Matrices
+ @ingroup matrix
+ @brief This category contains all basic arithmetic operations with matrices.
+
+ It includes matrix-matrix products,
+ matrix-vector products, addition of two matrices, scaling, orthogonal bases for the matrix columns and similar things.
+ Operations on matrix columns are available in the \ref matrix_col category. The computation of norms and related
+ things are available in the \ref matrix_norm category. Most routines are able to work with sparse and dense data.
+ For real and complex data sometimes exists two variants of a function. In the case of dense matrices we use @blas
+ (@netlibblas, @openblas, @mkl, @atlas, @flexiblas) operations as much as possible to get the best performance out of them.
+
+ More complex operations like solving linear equations or eigenvalue problems can be found in the corresponding
+ categories.
+
+ @sa matrix_col
+ @sa matrix_norm
+
+
+*********************************************************************************************************************
+@defgroup matrix_col Arithmetic Operations on Matrix Columns
+ @ingroup matrix
+ @brief This category contains various arithmetic operations on matrix columns.
+
+ These are for
+ example the norm of a column, scalar product of two columns, a gaxpy update of a column and
+ other similar operations. Most of them are only efficient on dense matrices but will work on sparse
+ ones too. Most of them use corresponding level-1 @blas (@netlibblas, @openblas, @mkl, @atlas) operations if it is possible.
+ @sa matrix_op
+ @sa matrix_norm
+
+
+*********************************************************************************************************************
+@defgroup matrix_norm Computation of Matrix Norms
+ @ingroup matrix
+ @brief This category collects all matrix norm computations and related functions like the condition number or its estimate.
+
+ Additionally there exists the computation of the two norm of a low-rank factor without
+ computing the large matrix. Depending on the storage type direct methods or iterative ones will be used for the
+ \f$2\f$-norm computation.
+
+ The computation of matrix-valued residuals is available in \ref direct_res or \ref lrcfadi.
+
+ @sa eigenvalues_dense
+ @sa eigenvalues_sparse
+
+
+*********************************************************************************************************************
+@defgroup matrix_data Allocate, Convert and Access to Matrices
+ @ingroup matrix
+ @brief This category contains all subroutines which act on the matrix storage type, data structures and data management.
+
+
+ It also includes routine to generate typical matrices like the identity or random ones. Beside that concatenation and
+ access to submatrices are part of this subsection too.
+
+ If you want to import matrices from other libraries which provide direct access to
+ @ref MESS_CSR, @ref MESS_CSC, @ref MESS_COORD or @ref MESS_DENSE storage
+ the functions \ref mess_matrix_csr, \ref mess_matrix_csc, \ref mess_matrix_coord, \ref mess_matrix_dense_from_carray,
+ and \ref mess_matrix_dense_from_farray are available. Otherwise the \ref mess_matrix_alloc function provides an
+ interface to allocate the different supported matrix formats.
+
+ @sa matrix_ds
+
+
+*********************************************************************************************************************
+@defgroup matrix_io      Input/Output Operations with Matrices
+ @ingroup matrix
+ @brief This category contains all functions to read, write and print matrices.
+
+ The default file format
+ for matrices is the @mm file format. It can be read using
+ \ref mess_matrix_read or \ref mess_matrix_read_formated. If you want to save a matrix as
+ a @mm file you can use \ref mess_matrix_write.  If @zlib, @bzip or
+ @lzma are found on the system  you can read gz-, bz2-, or xz-compressed @mm files too.
+ If you write a file which ends with .gz it
+ will be compressed using @gzip. The same works with bz2 and xz.
+
+ The \ref mess_matrix_print function and their variants can be used to print matrices to the screen.
+
+ @sa vector_misc
+
+
+*********************************************************************************************************************
+@defgroup matrix_misc Various Other Operations on Matrices
+ @ingroup matrix
+ @brief This category contains all matrix related functions that fit not well in one of the other categories.
+
+ These are for example reorderings like \ref mess_matrix_reorder_amd or \ref mess_matrix_reorder_colamd or permutations.
+
+ A special function is \ref mess_matrix_spy which produces a spy plot of a matrix as a bmp file.
+
+ @sa vector_misc
+
+
+*********************************************************************************************************************
+@defgroup matrix_ds Data Structures, Types and Macros for Handling Matrices
+ @ingroup matrix
+ @brief This category contains all matrix related data structures, macros and type definitions.
+
+ Additionally it contains all directly related macros. The definition of the data_type (\ref mess_datatype_t) and
+ the operation (\ref mess_operation_t) for \ref mess_matrix_mvp, \ref mess_matrix_gaxpy and \ref mess_matrix_multiply
+ can be found in \ref general.
+
+
+*********************************************************************************************************************
+@defgroup matrix_mvpcall Generic matrix-vector Products
+ @ingroup matrix
+ @brief Representation of a generic matrix-vector Product.
+
+ Additionally it contains a clean up of a @ref mess_mvpcall object and a function applying a given operation to a given
+ matrix.
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup vector Vector Operations
+@brief This section contains all vector related operations.
+
+Vectors are representes as instances of @ref mess_vector and stored in Fortran storage format.
+You have to initialize a @ref mess_vector instance  with @ref mess_vector_init and destroy it afterwards with @ref mess_vector_clear.
+@code{.c}
+ mess_vector v;
+ mess_int_t rows = 10;
+ mess_vector_init(&v,rows, MESS_REAL);
+ //perform operations with v
+ mess_vector_clear(&v);
+@endcode
+You can find more informations in the following sections:
+ <ul>
+    <li> @ref vector_ds
+    <li> @ref vector_op
+    <li> @ref vector_misc
+ </ul>
+
+*********************************************************************************************************************
+@defgroup vector_ds Data Structures and Related Functions
+ @ingroup vector
+ @brief This category contains all vector related data structures, type definitions and functions.
+
+ It includes functions to
+ <ul>
+ <li> convert and copy a vector in various versions
+ <li> generate a complex vector from real and imaginary part
+ <li> get the real or imaginary part of a complex vector
+ <li> initialize and clean up a vector
+ </ul>
+ and data structures and type definitions to implement a vector.
+
+
+
+*********************************************************************************************************************
+@defgroup vector_op Arithmetic Operations with Vectors
+ @ingroup vector
+ @brief This category contains all basic arithmetic operations with vectors.
+
+ It includes
+ <ul>
+ <li> an axpy update of a vector
+ <li> real and complex vector products
+ <li> scaling
+ <li> the computation of different norms
+ <li> the computation of the minimum and maximum value of a vector.
+ </ul>
+ Additionally there is a macro to scale a real or complex vector.
+
+*********************************************************************************************************************
+@defgroup vector_misc Various Other Operations with Vectors
+ @ingroup vector
+ @brief This category contains all vector related functions that fit not well in one of the other categories.
+
+ It includes functions to
+ <ul>
+ <li> concatenate two vectors
+ <li> create a linspace or a logspace to different bases
+ <li> generate a vector filled with zeros, ones or random numbers
+ <li> get a value at a certain position
+ <li> permute a vector in various versions
+ <li> read, write and print a vector
+ <li> split a vector at a certain position.
+ </ul>
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup direct    Direct Solvers for Linear Systems
+@brief This group contains various direct solvers for linear systems and other useful subroutines from this area.
+
+The @ref mess_direct object and the corresponding function represent various direct solvers in @mess.
+Depending on the configuration solvers from @lapack and @suitesparse are integrated. The basic operations
+to deal with a solver object is described in \ref direct_interface.  Beside solvers for
+\f[ Ax=b \f]
+there exist direct solvers for Lyapunov Equations and other some matrix decompositions, too.
+
+
+*********************************************************************************************************************
+@defgroup direct_interface Generic Interface to Direct Solvers
+ @brief   This group describes the interface to the direct solvers.
+
+ @ingroup direct
+
+ The generic interface provides an unified interface for various direct solvers. Independently from the underlying
+ solver the linear system could solved in the same way every time. The interface dynamically wraps the correct
+ solve function for the selected solver.
+
+
+*********************************************************************************************************************
+@defgroup direct_solvers  Direct Solvers for Linear Systems
+ @brief   This group contains solvers for normal linear systems.
+
+ @ingroup direct
+
+ This module provides direct solvers, which act as backend for \ref mess_direct. Various solvers like LU, Cholesky
+ or QR decompositions are available. An automatic selection system depending on the installed features and the given
+ matrix is available, too. This can be used via \ref mess_direct_lu  and \ref mess_direct_chol.
+ Additionally there are enumeration types in this category to select the behaviour of a Cholesky and LU decomposition.
+
+
+*********************************************************************************************************************
+@defgroup direct_tri         Triangular Solvers
+ @ingroup direct
+ @brief  This module contains functions to solve different triangular systems.
+
+ The solution of triangular linear systems is a basic building block for the solution of generic linear systems.
+ This section provides different solver for different shapes and data types of triangular systems.
+
+
+*********************************************************************************************************************
+@defgroup direct_meq    Direct Solvers for Matrix Equations
+ @ingroup direct
+ @brief  This group contains direct solver for matrix Equations like the Lyapunov Equation.
+
+ The solution of matrix equations is the main goal of the @mess library. \n
+ In contrast to the normal linear solvers these solvers are mostly restricted to matrix-valued right hand sides. For this case the function
+ \ref mess_direct_solve will cause an error. Please use \ref mess_direct_solvem instead. <br>
+ Some of them like the solve for the Riccati Equation will not setup a \ref mess_direct object because they cannot
+ reuse their data and compute the solution directly. <br>
+ Additionally to these functions are enumerations to select a preconditioner.
+
+
+*********************************************************************************************************************
+@defgroup direct_decompose Matrix Decompositions
+ @ingroup direct
+ @brief   This group contains matrix decompositions which are strongly related to direct solvers.
+
+ The matrix decompositions mentioned in this section are strongly related to direct solvers but are used mostly outside
+ a solver context. Currently this affects only the Column Pivoted QR decomposition.
+
+
+*********************************************************************************************************************
+@defgroup direct_res    Residual Computations
+ @ingroup direct
+ @brief   This group contains various dense two norm residual computations.
+
+ The residual computations can be used to check if a given solver has computed a good solution to a given problem.
+ All residuals are computed as dense vectors or matrices. It might not be a good idea to use them for large matrix
+ equations.
+
+
+*********************************************************************************************************************
+@defgroup direct_misc Various Other Functions related to Direct Solvers.
+ @ingroup direct
+ @brief This group contains various other function related to the direct solution of linear systems. Mostly used internally.
+
+ It includes the analysis of triangular matrices and the solve of
+ \f[ Ax = B(:,k). \f]
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup multisolvers Solvers for Sets of Linear Systems
+@brief   This group contains multi-direct solvers for a shifted linear systems and other useful subroutines from this area.
+
+This group provides multi-direct solvers for a system
+\f[ (s A + p E)x=b, \f]
+where \f$ s \f$ and \f$ p \f$ are a set of shiftparameters. The basic operations to deal with a solver object is
+described in \ref multisolvers_interface.
+
+
+*********************************************************************************************************************
+@defgroup multisolvers_interface    Generic Interface to Multisolvers
+ @ingroup multisolvers
+ @brief This category describes the interface to the multi-direct solvers.
+
+ It includes functions to
+ <ul>
+ <li> clean up and initialize \ref mess_multidirect objects
+ <li> load and unload a system with an index
+ <li> return the data type or the memory usage of a multisolver
+ <li> select a multisolver from a given name
+ <li> solve linear systems
+ <li> wait until an index is loaded completely.
+ </ul>
+
+
+*********************************************************************************************************************
+@defgroup multisolvers_solvers  Multisolvers
+ @ingroup multisolvers
+ @brief This category contains multi-direct solvers for a shifted linear systems.
+
+ It includes functions creating multisolvers for a shifted system
+ \f[ (s A + p E)x=b \f]
+ with the aid of different routines. <br>
+ Additionally a Single-Pattern-Multi-Value LU decomposition of the shifted system can be computed.
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup itsolver  Iterative Solvers for Linear Systems
+ @brief This group contains preconditioner, iterative solvers for a system of linear equations and other useful subroutines from this area.
+
+ A <b>linear iteration method</b> to solve a system of linear equations \f$ Ax=b \f$ generally looks like
+\f[  x^{k+1} = M x^{k} + N b , \f]
+where \f$ M=(I-NA) \f$. Matrices  \f$ M \f$ and \f$ N \f$ are specified in the different methods. <br>
+A <b>preconditioner</b> \f$ P \f$ of a matrix \f$ A \f$ is a matrix such that \f$ P^{-1}A \f$ has a smaller condition number
+than \f$ A \f$. It is useful in linear iteration methods since the rate of convergence for most linear iterative solvers
+increases as the condition number of a matrix decreases as a consequence  of preconditioning.
+
+
+*********************************************************************************************************************
+@defgroup itsolver_ds Types and Datastructures
+ @ingroup itsolver
+ @brief This category contains all solver related data structures, functions and type definitions.
+
+ It includes the structures solver status and options and the corresponding initialization, print and clean up
+ functions. Additionally it contains the type definition of a preconditioner.
+
+
+*********************************************************************************************************************
+@defgroup itsolver_sol  Solvers
+ @ingroup itsolver
+ @brief This category contains iterative solvers for a system of linear equations and other useful subroutines.
+
+ It includes various iterative solvers like BICGSTAB, CG, Gauss-Seidel, GMRES, Jacobi, (S)SOR for a linear system
+ \f$ Ax=b \f$ and a convergence check for the Jacobi iteration.
+
+
+*********************************************************************************************************************
+@defgroup itsolver_pre  Preconditioners
+ @ingroup itsolver
+ @brief This category contains various preconditioner.
+
+ It includes the initialization and clean up of the special preconditioner structure and contains different
+ preconditioner like a diagonal, ILU or (S)SOR preconditioner.
+
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup dynsys Dynamical Systems
+@brief This module covers all basic things for dynamical systems.
+
+Dynamical systems are represented as a
+<ul>
+<li> first order system
+\f[
+\begin{array}{ccccc}
+  E \dot{x}(t) &=& A x(t) & + B u(t) &, \\
+   y(t) &=& C x(t) &  & ,
+\end{array}
+\f]
+where \f$ A \in \mathbb{R}^{n \times n} \f$ is a system matrix, \f$ E \in \mathbb{R}^{n \times n}  \f$ is a mass matrix,
+\f$ B \in \mathbb{R}^{n \times m} \f$ is an input matrix and \f$ C \in \mathbb{R}^{p \times n}  \f$ is an output matrix
+of the first order system.  <br>
+<li> second order system
+\f[
+ \begin{array}{cccccc}
+   M \ddot{x}(t) + G \dot{x}(t) + & K x(t) &=& B u(t) & & , \\
+   & y(t) &=& C_p x(t) & + C_v \dot{x}(t) & ,
+ \end{array}
+ \f]
+where \f$ M  \in \mathbb{R}^{n \times n} \f$, \f$ G \in \mathbb{R}^{n \times n} \f$ , \f$ K \in \mathbb{R}^{n \times n} \f$ ,
+\f$ B \in \mathbb{R}^{n \times m}  \f$ is an input matrix, \f$ C_p \in \mathbb{R}^{p \times n} \f$ is a position  and
+\f$ C_v \in \mathbb{R}^{p \times n}  \f$ a velocity output matrix of the second order system.
+</ul>
+The time dependent vectors \f$ x(t) \in \mathbb{R}^{n} \f$, \f$ u(t) \in \mathbb{R}^{m} \f$ and \f$ y(t) \in \mathbb{R}^{p} \f$
+are usually state, input and output vector.
+
+
+*********************************************************************************************************************
+@defgroup dynsys_interface Interface for handling Dynamical Systems
+ @ingroup dynsys
+ @brief This category contains a structure, definitions and functions corresponding to first and second order systems.
+
+ It includes a structure for dynamical systems and its corresponding type definition , definitions of (generalized)
+ time invariant systems ((G)LTI) and second order systems. <br>
+ Additionally there are functions to
+ <ul>
+ <li> clean up, initialize and print \ref mess_dynsys objects
+ <li> evaluate a transfer function
+ <li> project different systems
+ <li> return the name of the type
+ <li> test if a certain system is a (G)LTI system, a second order system or a single input single output
+     (SISO) system
+ <li> test if a matrix or a system is stable.
+ </ul>
+ (G)LTI and second order systems can be generated and second order systems can be converted to first order systems:
+ \f[
+ \begin{array}{cccccc}
+ \left[ \begin{array}{cc}
+    I & 0 \\  0 &  M
+ \end{array} \right]
+ \left[ \begin{array}{c}
+    \dot{x}(t) \\ \ddot{x}(t)
+ \end{array} \right]  +
+ \left[ \begin{array}{c c}
+    \ 0 & I \\ -K & -G
+ \end{array} \right]
+ & \left[  \begin{array}{c}
+     x(t) \\ \dot{x}(t)
+ \end{array} \right] &=&
+ \left[ \begin{array}{c}
+     0 \\ B
+ \end{array} \right] & u(t) & , \\
+ & y(t) &=&
+ \left[ \begin{array}{c c}
+     C_p & C_v
+ \end{array} \right]
+ & \left[ \begin{array}{c}
+     x(t) \\ \dot{x}(t)
+ \end{array} \right] & .
+ \end{array}
+ \f]
+
+
+*********************************************************************************************************************
+@defgroup dynsys_mor Model Order Reduction
+ @ingroup dynsys
+ @brief This section contains categories reducing the the order of a GLTI system in different ways.
+
+
+*********************************************************************************************************************
+@defgroup dynsys_mor_bt Balanced Truncation
+ @ingroup dynsys_mor
+ @brief This category contains all necessary structures, definitions and functions to reduce the order of a GLTI system with the help of balanced truncation.
+
+
+ A generalized linear time invariant system
+ \f[
+ \begin{array}{ccccc}
+     E\dot{x}(t)&=& A x(t) &+ B u(t) & , \\
+     y(t) &=& C x(t) & & ,
+ \end{array}
+ \f]
+ where \f$ E \f$ is nonsingular and \f$ A- \lambda E \f$ is stable, is called <b>balanced</b>, if the Controllability Gramian
+ \f$ W_C \f$ and the Observability Gramian \f$ W_O \f$, which are the solutions of the generalized Lyapunov Equations
+ \f[
+ \begin{array}{ccccc}
+      AW_C E^T + & EW_C A^T &=& -BB^T &, \\
+      A^T \hat{W_O} E + &E^T \hat{W_O} A &=& -CC^T &, \\
+      & W_O &=& E^T \hat{W_O} E &,
+ \end{array}
+ \f]
+ satisfy
+ \f[ W_C = W_O = \left[ \begin{array}{c c c} \sigma_1 & & \\ & \ddots & \\ & & \sigma_n \end{array} \right] \f]
+ with \f$ \sigma_1 \geq \cdots \geq \sigma_n >0 \f$ and \f$ \sqrt{\lambda(W_C W_O)}= \{ \sigma_1 , \cdots , \sigma_n\}
+ \f$ .
+ <hr>
+ A <b>balanced truncation</b> can be computed by the Square-Root method. First, a Singular Value Decomposition (SVD)
+ of the Gramians is computed
+ \f[
+ \begin{array}{cccc}
+     W_O &=& U_O \Sigma_O U_O^T & , \\
+     W_C &=& U_C \Sigma_C U_C^T & ,
+ \end{array}
+ \f]
+ to get the Cholesky factors of the Gramians
+ \f[
+ \begin{array}{cccc}
+      S &=& \left( U_O \Sigma_O^{\frac 1 2}\right)^T &, \\
+      R &=& \left( U_C \Sigma_C^{\frac 1 2}\right)^T & .
+ \end{array}
+ \f]
+ Next, the SVD of \f$ SR^T \f$ is computed:
+ \f[
+ SR^T = U \Sigma \hat{V}^T = \left[
+ \begin{array}{c c}
+ U_1 & U_2
+ \end{array}
+ \right]
+ \left[
+ \begin{array}{c c}
+ \Sigma_1 & \\
+ & \Sigma_2
+ \end{array}
+ \right]
+ \left[
+ \begin{array}{c}
+ \hat{V}_1^T \\ \hat{V}_2^T
+ \end{array}
+ \right]. \f]
+ The truncation of discardable partitions \f$ U_2, \hat{V}_2^T, \Sigma_2 \f$ results in the reduced order model
+ \f[
+  \begin{array}{ccccc}
+      W^T E V \dot{x}(t) &=& W^T A V x(t) & + W^T B  u(t) & , \\
+      y(t) &=& C V x(t) & &  ,
+  \end{array}
+ \f]
+ where
+ \f[
+ \begin{array}{cccc}
+     W^T &=& \Sigma_1^{- \frac 1 2}  \hat{V}_1^T  R   E^{-1} &, \\
+     V   &=&  S^T                       U_1      \Sigma_1^{- \frac 1 2} &.
+ \end{array}
+ \f]
+ source: \cite morAnt05
+
+*********************************************************************************************************************
+@defgroup dynsys_mor_h2   H2  Model Order Reduction
+ @ingroup dynsys_mor
+ @brief This category contains all necessary structures, definitions and functions to reduce the order of a LTI system with the help of the \f$ H_2 \f$ MOR.
+
+ A LTI system \f$ \Sigma \f$ of dimension \f$ n \f$
+  \f[
+  \begin{array}{ccccc}
+      \dot{x}(t) &=& A x(t) &+ B u(t)& , \\
+      y(t) &=& C x(t) & & ,
+  \end{array}
+  \f]
+ with \f$ A \in \mathbb{R}^{n \times n }, B \in \mathbb{R}^n, C \in \mathbb{R}^{1 \times n} \f$ is given with
+ a transfer function
+ \f[ H(s)= C(sI-A)^{-1} B \f]
+ and a reduced model \f$ \Sigma_r \f$ of dimension \f$ n_r \ll n \f$
+  \f[
+  \begin{array}{ccccc}
+     \dot{x}_r(t) &=& A_r x(t) &+ B_r u(t) & , \\
+     y_r(t) &=& C_r x(t) & & ,
+  \end{array}
+  \f]
+ with \f$ A_r \in \mathbb{R}^{n_r \times n_r }, B \in \mathbb{R}^{n_r}, C \in \mathbb{R}^{1 \times n_r} \f$ is searched
+ with a transfer function
+ \f[ H_r(s)= C_r (sI-A_r)^-1 B_r \f]
+ fulfilling
+ \f[ \min \Vert H-H_r \Vert_{H_2} . \f]
+ To solve this problem a projection to a reduced subspace is used:
+ \f[
+ \begin{array}{cccc}
+    A_r &=& W^TAV &, \\
+    B_r &=& W^TB &, \\
+    C_r &=& CV  &.
+ \end{array}
+ \f]
+ The choice of \f$ \mathcal{W}= span(W)\f$ and \f$ \mathcal{V}=span(V) \f$, where \f$ W^TV=I \f$ is crucial. <br>
+
+ There are two types of \f$ H_2 \f$ MOR implemented:
+ <ul>
+ <li> <b>IRKA</b> (iterative rational Krylov algorithm) <br>
+ This algorithm creates the demanded subspaces with the aid of the Krylov subspace method.<br>
+ The definition of the minimum will be weakened by the definition of a lokal minimum:
+ \f[ \exists \epsilon > 0 : \Vert H-H_r \Vert_{H_2} \leq \Vert H-\tilde{H}_r^{\epsilon} \Vert_{H_2} \ \ \ \forall
+ \Vert H_r-\tilde{H}_r^{\epsilon} \Vert_{H_2} \leq C \epsilon . \f]
+ If \f$ H_r \f$ is such a local minimum of \f$ H \f$, then it holds
+ \f[ H(-\mu_i)=H_r(-\mu_i) , H'(-\mu_i)=H_r'(-\mu_i)\f]
+ for all poles \f$ \mu_i \f$ of \f$ H_r. \f$ <br>
+
+ In pseudocode, the classical IRKA algorithm looks like <br>
+
+ Input: \f$ A \in \mathbb{R}^{n \times n}, B \in \mathbb{R}^n, C \in \mathbb{R}^{1 \times n}, \mu^{(0)}=\{\mu_1, \cdots,
+ \mu_r\} \f$<br>
+ Output:\f$ A_r \in \mathbb{R}^{n_r \times n_r}, B \in \mathbb{R}^{n_r}, C \in \mathbb{R}^{1 \times n_r} \f$ with a
+ local minimum \f$ H_r \f$
+<ol>
+<li> \f$ k \leftarrow 0 \f$
+<li> Determine \f$ \mathcal{V}=span(V)=\{(\mu_1 I-A)^{-1}B, \cdots , (\mu_r I-A)^{-1}B\} \f$
+<li> Determine \f$ \mathcal{W}=span(W)=\{(\mu_1 I-A)^{-T}C^T, \cdots , (\mu_r I-A)^{-T}C^T\} \f$
+<li> \f$ W= W(W^TV)^{-T} \f$ such that \f$ W^TV=I \f$
+<li>WHILE \f$ \Vert \mu^{k+1} -\mu^k \Vert> tol \f$ DO
+<ol>
+<li>\f$ A_r= W^TAV \f$
+<li>\f$ \mu_l^{k} = \lambda_l(A_r) \f$
+<li> Determine \f$ \mathcal{V}=span(V)=\{(\mu_1 I-A)^{-1}B, \cdots , (\mu_r I-A)^{-1}B\} \f$
+<li> Determine \f$ \mathcal{W}=span(W)=\{(\mu_1 I-A)^{-T}C^T, \cdots , (\mu_r I-A)^{-T}C^T\} \f$
+<li> \f$ W= W(W^TV)^{-T} \f$
+<li> \f$ k \leftarrow k+1 \f$
+</ol>
+<li> \f$ A_r= W^TA V, B_r= W^T B, C= C V \f$ <br>
+</ol>
+source: \cite morGugAB08
+
+<li> <b>TSIA</b> (two-sided iteration algorithm) <br>
+This algorithm creates the demanded subspaces with the aid of the solution of two Sylvester Equations. <br>
+The pseudocode of the two-sided iteration algorithm looks like <br>
+Input: \f$ A \in \mathbb{R}^{n \times n}, B \in \mathbb{R}^n, C \in \mathbb{R}^{1 \times n} \f$ and initial solution
+\f$ A_r \in \mathbb{R}^{n_r \times n_r}, B \in \mathbb{R}^{n_r}, C \in \mathbb{R}^{1 \times n_r} \f$ <br>
+Output:\f$ A_r \in \mathbb{R}^{n_r \times n_r}, B \in \mathbb{R}^{n_r}, C \in \mathbb{R}^{1 \times n_r} \f$ <br>
+<ol>
+<li>FOR \f$ i=1, \cdots \f$ DO
+<ol>
+<li> Determine \f$ X_k \f$ and \f$ Y_k \f$ by solving
+\f[ AX_k + X_k A_r^T + BB_r^T=0 \f]
+\f[ A^T Y_k + Y_k A_r - C^T C_r =0 \f]
+<li> \f$ V= X_k , W=Y_k \f$
+<li> \f$ [V,W] = Biorthogonalization(V,W) \f$
+<li> \f$ A_r = W^T A V, B_r = W^T B, C_r = CV \f$
+</ol>
+END FOR
+</ol>
+source: \cite morXuZ11
+</ul>
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup eigenvalues Eigenvalue and Related Problems
+@brief This section contains categories to compute eigenvalues, eigenvectors and solve related problems.
+
+A scalar \f$ \lambda \in \mathbb{C} \f$ is called an <b>eigenvalue</b> of a matrix \f$ A \in \mathbb{C}^{n \times n}
+\f$ if \f$ \lambda \f$ is a root of the <b>characteristic polynomial</b>
+\f[ p (\lambda) := det (A- \lambda I).\f]
+A non-zero vector \f$ x \in \mathbb{C}^n \f$ is called a (right) <b>eigenvector</b> of \f$ A \f$ associated with the
+eigenvalue \f$ \lambda \f$ if it fulfills
+\f[ (A-\lambda I)x=0.\f]
+The corresponding <b>left eigenvectors</b> satisfies
+\f[ y^H A = \lambda y^H.  \f]
+The problem to find scalars \f$ \lambda \f$ and non-zero vectors \f$ x \f$ satisfying
+\f[Ax=\lambda x\f]
+is called standard <b>eigenvalue problem</b>.<br>
+
+A <b>generalized eigenvalue problem</b> is the problem of finding scalars \f$ \lambda \in \mathbb{C}\f$ and non-zero
+vectors \f$ x \in \mathbb{C}^n \f$ that satisfy
+\f[ Ax= \lambda B x,  \f]
+where \f$ A, B \in \mathbb{C}^{n \times n}. \f$ <br>
+The scalar \f$ \lambda \f$ is a root of \f$ det(A-\lambda B) \f$ and is called <b>generalized eigenvalue</b> with
+corresponding (right) <b>eigenvector</b> \f$ x \f$.<br>
+A non-zero vector \f$ y \in \mathbb{C}^n\f$ fulfilling
+\f[ y^H A = \lambda y^H B \f]
+is called a <b>left eigenvector</b> of \f$ (A,B) \f$.
+
+
+source: [http://www2.mpi-magdeburg.mpg.de/mpcsc/mitarbeiter/kuerschner/docs/masterthesis.pdf]
+
+
+*********************************************************************************************************************
+@defgroup eigenvalues_dense Dense Eigenvalue Solvers
+ @ingroup eigenvalues
+ @brief This category contains all necessary functions to solve the eigenvalue problem and related problems.
+
+ It includes functions computing eigenvalues and left and right eigenvectors of one matrix or a pair of matrices
+ and residuals of eigenvalues.
+
+ Additionally there are functions returning the real or complex <b>Schur decomposition</b> of a matrix \f$ A \in
+ \mathbb{C}^{n \times n} \f$, i.e.
+ \f[ T = Q^HAQ= diag(\lambda_1, \cdots, \lambda_n) + N , \f]
+ where \f$ Q \in \mathbb{C}^{n \times n} \f$ is an unitary matrix and \f$ N \in \mathbb{C}^{n \times n} \f$ is a
+ strictly upper triangular nilpotent matrix. <br>
+ The real or complex <b>generalized Schur decomposition</b> of two matrices \f$ A,B \in \mathbb{C}^{n \times n} \f$, i.e.
+  \f[
+  \begin{array}{cccc}
+      S &=& Q^H A Z &, \\
+     T  &=& Q^H B Z  &,
+  \end{array}
+  \f]
+ where \f$ S , T \f$ are (quasi) upper triangular and upper triangular matrices is also implemented. <br>
+ Their diagonal entries reveal the eigenvalues of \f$(A , B)\f$ by
+ <ul>
+ <li> \f$ \lambda_i = \frac{s_{ii}}{t_{ii}} \f$,
+ <li> \f$ \lambda_i = \infty \f$ if \f$ t_{ii} = 0 \f$ and \f$ s_{ii} \ne 0 \f$ ,
+ <li> \f$ \Lambda(A,B) \f$ = \f$ \mathbb{C} \f$ if there is an \f$ i \f$ with \f$ s_{ii} = t_{ii}=0 \f$,
+ </ul>
+ for \f$ i= 1 , \cdots , n \f$.
+
+ Furthermore this category contains functions computing the <b>singular value decomposition (SVD)</b> of a matrix \f$ A
+ \in \mathbb{C}^{n \times n} \f$, i.e
+ \f[ A = U \Sigma V^H,  \f]
+ where \f$ U \in \mathbb{C}^{m \times m} , V \in \mathbb{C}^{n \times n} \f$ and \f$ \Sigma \in \mathbb{C}^{m \times n}
+ \f$.The diagonal entries of the upper \f$ (n \times n) \f$ matrix \f$ \Sigma \f$ are called singular values
+ and are ordered such that
+ \f[ \sigma_{1,1} \geq \cdots \geq \sigma_{r,r} > \cdots > \sigma_{n,n} = 0, \f]
+ where \f$ r := rank(A) \f$.
+
+ Another implemented function returns the <b>sign</b> of a matrix \f$ A \in \mathbb{C}^{n \times n} \f$, i.e.
+ \f[ sign(A) = A(A^2)^{- \frac{1}{2}} .  \f]
+ For more information about the computation of the sign of a matrix see \ref lrcfadi_othersolvers.
+
+
+ source: [http://www2.mpi-magdeburg.mpg.de/mpcsc/mitarbeiter/kuerschner/docs/masterthesis.pdf]
+
+
+
+*********************************************************************************************************************
+@defgroup eigenvalues_sparse    Sparse Eigenvalue Solvers
+ @ingroup eigenvalues
+ @brief This category contains all necessary structures, definitions, enumerations and functions to solve the eigenvalue problem and related problems for sparse matrices.
+
+ It includes different iterative methods to compute some approximate eigenvalues and their corresponding eigenvectors,
+ like Arnoldi or Lanczos method, to compute only the largest absolute eigenvalue and its corresponding eigenvector
+ with the aid of the power iteration or to compute the smallest absolute eigenvalue and its corresponding eigenvector
+ using the inverse iteration.
+
+ The <b>power iteration</b> is a method to compute the largest absolute eigenvalue and its corresponding eigenvector.<br>
+ Therefor it computes in every iteration step \f$ k=0,1,\cdots \f$
+ \f[ r_{k+1}= \frac{A r_k}{\Vert A r_k \Vert} = \frac{A^{k+1}r_0}{\Vert A^{k+1} r_0 \Vert}\f]
+ for a given initial vector \f$ r_0 \in \mathbb{C}^n \f$ which fulfills \f$ Ar_0 \neq 0 \f$. <br>
+ To compute the largest eigenvalue, the Rayleigh quotient is generated
+ \f[ \frac{r_k^H A r_k}{r_k^H r_k}=\frac{r_k^H r_{k+1}}{\Vert r_k \Vert_2^2} \f]
+ converging to the largest eigenvalue.<br>
+ This method is converging with a convergence ratio of \f$ \displaystyle \left\vert \frac{\lambda_2}{\lambda_1} \right\vert \f$, where
+ \f$ \lambda_2 \f$ denotes the second dominant eigenvalue.
+
+ The <b>inverse iteration</b> is a method to compute the smallest eigenvalue in absolute value and its corresponding
+ eigenvector or to find an approximate eigenvector when an approximation to a corresponding eigenvalue (called shift)
+ is already known. <br>
+ Solving with a shift \f$ \theta \f$ means to solve
+  \f[\begin{array}{ccc}
+ q & = & \frac{x}{\Vert x \Vert_2 } \\
+ x & = & (A-\theta I) \backslash q \\
+ \lambda & = & q^T x
+ \end{array}
+ \f]
+ with an initial guess \f$ x \f$ until a certain tolerance is reached. In this case \f$ \lambda \f$ is the eigenvalue
+ closest to \f$ \theta \f$ with corresponding eigenvector \f$ x \f$. <br>
+ The convergence rate of the inverse iteration is \f$ \vert \frac{\lambda_1 - \theta}{ \lambda_2 - \theta} \vert \f$,
+ where \f$ \vert \lambda_1-\theta \vert^{-1} \f$ is the largest eigenvalue and
+ \f$ \vert \lambda_2 -\theta \vert^{-1} \f$ is the second largest eigenvalue of \f$ (A-\theta I)^{-1} \f$. <br>
+ if \f$ \theta =0 \f$ \f$ \frac{1}{\lambda} \f$ is the smallest absolute value and \f$ x \f$ its corresponding
+ eigenvector.
+
+The <b>Arnoldi method</b> is another algorithm to compute some eigenvalue and their corresponding eigenvalues.<br>
+Therefor an orthonormal base of the Krylov space
+\f[ \mathcal{K}_m(A,q) = span \{ q, Aq, A^2q, \cdots, A^{m-1}q \} \f]
+is computed for an initial vector \f$ q \in \mathbb{C}^n \f$.<br>
+Its output is an orthogonal matrix \f$ V \f$ and a Hessenberg matrix \f$ H \f$ and it holds
+\f[ AV=VH. \f]
+ Eigenvalues of \f$ H \f$ are also eigenvalues of \f$ A \f$ if \f$ h_{m+1,m}=0 \f$. In case of small values
+ \f$ h_{m+1,m} \f$ eigenvalues of \f$ H \f$ or good approximations for eigenvalues of \f$ A \f$.
+
+ The <b>Lanczos algorithm</b> can be considered as a simplified Arnoldi algorithm computing a tridiagonal and symmetric
+ matrix
+ \f[ T_{m,m}=V_m^H A V_m, \f]
+ which can be used to solve its eigenvalues \f$ \lambda_i^{(m)} \f$ and their corresponding eigenvectors
+ \f$ x_i^{(m)} \f$. Eigenvalues of \f$ T_{m,m} \f$ are approximate eigenvalues of \f$ A \f$.
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup lrcfadi   Low-Rank Methods for Matrix Equations
+@brief The Low-Rank Cholesky Factor (LRCF) are the state of the art large-scale matrix equations solvers.
+
+We provide implementations of this concept to solve Lyapunov Equations
+\f[ AXE^T+EXA^T +BB^T = 0 \f]
+or
+\f[ A^TXE+E^TXA +BB^T = 0 \f]
+and Riccati Equations
+\f[ AXE^T+EXA^T-BB^T+EXC^TCXE^T = 0 \f]
+or
+\f[ A^TXE+E^TXA-C^TC+E^TXBB^TCXE = 0. \f]
+
+
+*********************************************************************************************************************
+@defgroup lrcfadi_generic Generic Functions and Data Structures
+ @ingroup lrcfadi
+ @brief This category contains all necessary data structures, type definitions, enumerations and functions to handle LRCF methods.
+
+ The data structures are implemented to set options for the LRCF-algorithm, to define the type of equation,
+ to save the final status of the algorithm,to configure the LRCF-ADI based solver and to pass information to the
+ step function inside the ADI iteration. <br>
+ Additionally there are type definitions for all structures. <br>
+ This category also contains initialization, clean up, destroy, save, copy, fill up, print and display functions.
+
+
+*********************************************************************************************************************
+@defgroup lrcfadi_adi   The ADI and the ADI-NM Algorithm
+ @ingroup lrcfadi
+ @brief This category contains solving algorihms and useful subroutines.
+
+ It includes the parameter computation for the low-rank Cholesky factor alternate direction implicit (LRCF-ADI) and the
+ computation of Ritz values or \f$2\f$-norm residual  of an equation.
+ Additionally this category contains different solving functions for Lyapunov and Riccati Equations. <br>
+ The <b> LRCF-ADI </b> iteration computes an approximated
+ solution \f$ X \approx ZZ^H \f$ of a Lyapunov Equation
+ \f[ AX +XA^T +BB^T=0 \f]
+ by rewriting the ADI iteration
+ \f[
+ \begin{array}{cccc}
+    & X_0 &=& 0 \\
+    \text{for }  j=1, \cdots, J & \\
+    &(A + p_I) X_{j - \frac{1}{2}} &=& -BB^T - X_{j-1}(A^T-p_j I) \\
+    &(A + p_I) X_{j}^T &=& -BB^T - X_{j - \frac{1}{2}}^T(A^T-p_j I)
+ \end{array}
+ \f]
+ as one step iteration and factorize \f$ X_i=Z_iZ_i^T , i=0, \cdots, J \f$. <br>
+ This iteration can be also applied to generalized Lyapunov Equations
+ \f[ AXE^T + EXA^T +BB^T=0 \f]
+ if \f$ E \f$ is regular. In this case the ADI iteration holds with \f$ A := E^{-1}A \f$ and \f$ B := E^{-1}B \f$.
+
+ Another implemented algorithm that is based on the LRCF-ADI is the <b>LRCF-ADI with Galerkin-projection acceleration
+ (LRCF-ADI-GP)</b>. <br>
+ In this method, the LRCF-ADI iterate \f$ Z_i \f$ is computed. Afterwards an orthogonal basis is
+ computed via a QR factorization to project and to solve this smaller (generalized) Lyapunov Equation. Then \f$ Z_i \f$
+ will be updated.
+
+ One method to compute the solution of the Riccati Equation
+ \f[
+ \begin{array}{cccc}
+   &A^TX+XA-XBB^TX+C^TC &=&  0 \\
+   \text{or}&  \\
+   &AX +XA^T -XCCX +BB^T &=& 0
+ \end{array}
+ \f]
+ or the generalized Riccati Equation
+ \f[
+ \begin{array}{cccc}
+    &A^TXE+E^TXA-E^TXBB^TXE+C^TC &=& 0 \\
+    \text{or}& \\
+    &AXE^T+EXA^T-EXC^CXE^T+BB^T &=& 0
+ \end{array}
+ \f]
+ is the <b>LRCF Newton method (LRCF-NM) </b>. <br>
+ In this algorithm the (generalized) Riccati Equation is formulated as a (generalized) Lyapunov Equation with the help
+ of Newtons iteration
+ \f[ \mathcal{R}'|_X(N_l)= - \mathcal{R}(X_l) , \ \ \ X_{l+1}= X_l+N_l ,  \ \ \ l=0,1, \cdots \f]
+ where \f$ \mathcal{R}(X) \f$ corresponds to the (generalized) Riccati Equation and the Frechét derivate
+ \f$ \mathcal{R}'|_X \f$ is a Lyapunov operator. In every Newton step a (generalized) Lyapunov Equation need to be
+ solved. <br>
+ source: [http://www2.mpi-magdeburg.mpg.de/mpcsc/mitarbeiter/saak/lehre/Matrixgleichungen/Saak_09WS.pdf ,
+ http://www2.mpi-magdeburg.mpg.de/mpcsc/mitarbeiter/saak/talks/saak_MatEq_BS09.pdf]
+
+
+*********************************************************************************************************************
+@defgroup lrcfadi_eqn   Equation Generators
+ @ingroup lrcfadi
+ @brief This category contains functions to define and to build Lyapunov or Riccati Equations.
+
+ It includes functions to define the type of a (generalized) Lyapunov Equation
+ \f[ op(A) X op(E)^T + op(E) X op(A)^T +op(B) op(B)^T = 0 \f]
+ or a (generalized) Riccati Equation
+ \f[ \begin{array}{ccccc}
+   AXE^T+E X A^T- EXC^TCXE^T+BB^T &=& 0 \\
+   A^TXE +E^TX^A- E^TXBB^TXE +C^TC &=& 0
+   \end{array} \f]
+ where \f$ E=I \f$ in case of a continous Lyapunov or Riccati Equation. <br>
+ There are also functions to build up generalized Lyapunov and Riccati Equations from a second order LTI system
+ \f[
+ \begin{array}{cccccc}
+      M \ddot{x} + D\dot{x} + K & x &=& B u & & , \\
+      & y & = & C_p x & + C_v \dot{x} &,
+ \end{array}
+ \f]
+ which will be transformed to a first order system
+ \f[
+    \begin{array}{cc}
+    \underbrace{\left[\begin{array}{cc}
+        -K &  0 \\  0 &  M
+     \end{array}\right]}_{\mathcal{E}}
+     \left[\begin{array}{c}
+        \dot{x} \\ \ddot{x}
+     \end{array}\right] & =
+    \underbrace{ \left[\begin{array}{cc}
+        0 & -K \\ -K & -D
+     \end{array}\right]}_{\mathcal{A}}
+    \left[\begin{array}{c}
+        x  \\ \dot{x}
+    \end{array}\right]  +
+    \underbrace{\left[\begin{array}{c}
+        0 \\ B
+    \end{array}\right]}_{\mathcal{B}} u , \\
+     y & =
+    \underbrace{\left[\begin{array}{cc}
+        C_p & C_v
+    \end{array}\right]}_{\mathcal{C}}
+    \left[\begin{array}{c}
+        x  \\ \dot{x}
+     \end{array}\right].
+    \end{array}
+ \f]
+ In case of so1 or to a first order system
+   \f[
+    \begin{array}{cc}
+    \underbrace{\left[
+    \begin{array}{cc}
+        I &  0 \\  0 &  M
+    \end{array}
+    \right]}_{\mathcal{E}}
+     \left[
+    \begin{array}{c}
+       \dot{x} \\ \ddot{x}
+    \end{array}
+    \right] & =
+    \underbrace{ \left[
+    \begin{array}{cc}
+        0 &  I \\ -K & -D
+    \end{array}
+    \right]}_{\mathcal{A}}
+    \left[
+    \begin{array}{c}
+        x  \\ \dot{x}
+    \end{array}
+    \right]  +
+    \underbrace{\left[
+    \begin{array}{c}
+        0 \\ B
+    \end{array}
+    \right]}_{\mathcal{B}}u , \\
+     y &=
+    \underbrace{\left[\begin{array}{cc}
+        C_p & C_v
+    \end{array}\right]}_{\mathcal{C}}
+    \left[\begin{array}{c}
+        x  \\ \dot{x}
+     \end{array}\right].
+    \end{array}
+    \f]
+  in case of so2. <br>
+ The generalized Lyapunov Equation
+  \f[ \mathcal{A}X\mathcal{E}^T + \mathcal{E}X\mathcal{A}^T + \mathcal{B}\mathcal{B}^T = 0 \f]
+ or the generalized Riccati Equation
+ \f[ \mathcal{A}^TX\mathcal{E}+\mathcal{E}^TX\mathcal{A}-\mathcal{E}^TX\mathcal{B}\mathcal{B}^TX\mathcal{E} +
+ \mathcal{C}^T\mathcal{C} =0 \f]
+ are build out of this system. <br>
+ This category also includes function to build up generalized Lyapunov or Riccati Equations from a Hessenberg Index 2
+ DAE
+ \f[
+ \begin{array}{ccccc}
+    M \dot{z} &=& A z & + \ Gp +Bu &, \\
+    0 &=& G^T z & &, \\
+    y &=& Cz & &,
+ \end{array}  \f]
+ where \f$ G \f$ need to have full column rank and \f$ M \f$ has to be symmetric and positive definite. <br>
+ It is also possible to generate a low-rank updated generalized Lyapunov Equation
+ \f[ op(A-BK)Xop(E)^T + op(E)X op(A-BK)^T + op(Q)op(Q)^T =0 \f]
+ and to update the matrix \f$ K \f$ in this equation.
+********************************************************************************
+ @defgroup lrcfadi_eqn_apply Define own Matrix Generators
+  @ingroup lrcfadi_eqn
+  @brief Defining own Matrix Generators by implementing basic operations.
+
+*********************************************************************************************************************
+ @defgroup lrcfadi_othersolvers Additional Matrix Equation Solvers
+ @ingroup lrcfadi
+ @brief This category contains additional matrix equation solvers, which are not based on the ADI process.
+
+ It includes the implementation of the classical Newton iteration to solve a Riccati Equation and
+ the sign function iteration to solve a Lyapunov Equation. <br>
+
+ The classical dense <b>Newton method</b> solves a (generalized) Riccati Equation
+ \f[ A^T XE + E^T X A- E^T X G X E + Q = 0 \f]
+ by computing the solution of the resulting internal (generalized) Lyapunov Equation
+ \f[
+ \left( A-G X_i E \right)^T X_{i+1} E + E^T X_{i+1} \left( A-G X_i E \right) + \left( Q + E^T X_i G X_i E \right) = 0
+ \f]
+ with the aid of a dense Lyapunov solver. <br>
+ For \f$ E=I \f$ the generalized Riccati Equation becomes a standard Riccati Equation and hence the generalized
+ Lyapunov Equation becomes a standard Lyapunov Equation. <br>
+
+ The <b>sign function iteration</b> solves the standard Lyapunov Equation
+ \f[ A^T X + X A + B^T B = 0 \f]
+ with the aid of the matrix sign function and the Newton iteration. <br>
+ If  \f$ Z  \in \mathbb{R}^{n \times n} \f$ is a matrix with no eigenvalues on the imaginary axis then there exists
+ a nonsingular matrix \f$ S \in \mathbb{R}^{n \times n} \f$ such that \f$ Z = S^{-1}
+ \left[ \begin{array}{cc}
+   J_+ & 0 \\
+   0 & J_-
+ \end{array} \right] S \f$,
+ where \f$ \lambda(J_+) \subset \mathbb{C}_+ , \lambda(J_-) \subset \mathbb{C}_-\f$. <br>
+ The the <b>matrix sign function</b> is defined by
+ \f[ sign(Z) := S^{-1}
+ \left[ \begin{array}{cc}
+ I & 0 \\
+ 0 & -I
+ \end{array}\right] S. \f]
+ To compute the matrix sign function, the Newton iteration is applied to \f$ (sign(Z))^2=I \f$
+ \f[
+ \begin{array}{cccc}
+    Z_0 &=& Z &, \\
+    Z_{i+1} &=& \frac{1}{2} \left( Z_i + Z_i^{-1} \right) &.
+ \end{array}
+ \f]
+ This iteration converges globally quadratically to the sign of \f$ Z \f$. <br>
+ To solve the Lyapunov Equation as defined above, this iteration is applied to \f$ Z :=
+ \left[ \begin{array}{cc}
+    A^T & BB^T \\
+    0 & -A
+ \end{array} \right] \f$. <br>
+ The solution \f$ X \f$ is obtained from
+ \f[ sign(Z) = \lim\limits_{i \to \infty} Z_i =
+ \left[ \begin{array}{cc}
+    -I_n & 2X \\
+     0 & I_n
+ \end{array}\right]. \f]
+ The same holds for the generalized Lyapunov Equation
+ \f[ \hat{A}^T X E + E^T X \hat{A} + \hat{B}^T \hat{B} = 0 \f]
+ with \f$ A:= \hat{A}E^{-1} , B:= \hat{B}E^{-1} \f$. <br>
+ source: [http://www2.mpi-magdeburg.mpg.de/mpcsc/benner/pub/BaurB_gamm2004.pdf]
+
+
+*********************************************************************************************************************
+@defgroup lrcfadi_misc Miscellaneous Functions
+ @ingroup lrcfadi
+ @brief This category contains several function that do not fit in any other category.
+
+ It includes functions to
+ <ul>
+ <li> compute shift parameter solving the ADI min max problem suboptimal
+ <li> compute the \f$2\f$-norm difference of an old and a new solution factor
+ <li> compute the maximal magnitude of the rational ADI function over a discrete subset of the left
+      complex halfplane
+ <li> perform a column compression on the low rank factor.
+ </ul>
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup easyfrontend Easy Frontends to Main Functions
+ @brief This section contains a fronend to compute a solution for some major functions.
+
+ It includes a function to solve a Lyapunov Equation
+ \f[ AX + XA^T + BB^T=0 \f]
+ or a generalized Lyapunov Equation
+ \f[ AXE^T + EXA^T + BB^T = 0. \f]
+ Therefor it returns the Cholesky factor \f$ Z \f$ of the solution \f$ X \f$ such that \f$ X \approx Z Z^T \f$.
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup graph     Graph Algorithms
+ @brief This section contains different graph algorithms.
+
+ It includes functions to
+ <ul>
+ <li> calculate the reachability set of the nodes over a given graph
+ <li> perform a depth-first-search (DFS) on a graph
+ <li> permute a matrix of a graph.
+ </ul>
+ The DFS algorithm and the function to compute the reachability set only works for @ref MESS_CSC matrices. <br>
+ The permutation algorithm only works for @ref MESS_CSR matrices.
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup matgen    Matrix Generators
+@brief This section includes definitions and functions to generate matrices.
+
+
+*********************************************************************************************************************
+@defgroup matgen_fdm  FDM Matrix Generators
+ @ingroup matgen
+ @brief This category contains a type definition and functions concerning the finite difference discretization.
+
+ The type definition creates functions \f$ f_x, f_y \f$ and \f$ g \f$ of the partial differential equation (PDE)
+ \f[ \Delta u - f_x \frac{\mathrm{d}u}{\mathrm{d}x} - f_y \frac{\mathrm{d}u}{\mathrm{d}y} - gu= RHS \f]
+ on \f$ \Omega = (0,1) \times (0,1) \f$ with boundary condition
+ \f[ u=0  \f]
+ on \f$ d \Omega \f$. <br>
+ There are also functions generating the stiffness matrix \f$ A \f$ for the finite difference discretization of this
+ PDE, a \f$ (n \times 1) \f$ matrix \f$ B \f$, a \f$ (1 \times n) \f$ matrix \f$ C \f$ and a vector \f$ v \f$
+ containing the values of a function \f$ f(x,y) \f$ on an equidistant grid in the interior of the unit square.
+
+
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup error     Error Handling
+@brief This section includes different error and warning definitions and functions.
+
+
+*********************************************************************************************************************
+@defgroup error_codes Error Codes and Handling
+ @ingroup error
+ @brief This category contains different error definitions and functions.
+
+ Definitions include input, output, convergence, runtime, memory, implementation errors. <br>
+ The functions create strings to describe the error or set a certain error level.
+
+
+*********************************************************************************************************************
+@defgroup error_macro Error Macros
+ @ingroup error
+ @brief This category contains different error and warning definitions.
+
+ It includes definitions to print warnings concerning the number of the LOGLEVEL. Additionally it
+ contains definitions to print the name of the current function or error messages concerning the LOGLEVEL.
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup interfaces    Interfaces to other Programming Languages and Libraries
+@brief This section contains several categories converting objects of another programming language to C objects and vice versa.
+
+
+*********************************************************************************************************************
+@defgroup interfaces_csparse Interface to CSparse
+ @ingroup interfaces
+ @brief There are no definitions or functions in this category.
+
+ There are only static functions in the @csparse structure interface_csparse.h.
+
+
+*********************************************************************************************************************
+@defgroup interface_cholmod Interface to Cholmod
+ @ingroup interfaces
+ @brief This category contains different conversion functions.
+
+ It includes functions to convert a dense \ref mess_matrix to a @c cholmod_dense datastructure, a  compressed sparse
+ column (@ref MESS_CSC) \ref mess_matrix to a @c cholmod_sparse data structure and a \ref mess_vector to a @c cholmod_dense
+ datastructure (or vice versa).
+
+
+*********************************************************************************************************************
+@defgroup interfaces_python Interface to Python
+ @ingroup interfaces
+ @brief This category contains different files, definitions and functions for @python.
+
+ It includes files converting a @python matrix or array to a @c C matrix or array (and vice versa) and calling functions
+ from @python. <br>
+ Additionally there are function to convert a \ref mess_matrix or a \ref mess_vector to a @python matrix or vector
+ (and vice versa) and to parse attributes for the LRCF-ADI algorithm from a  @c PyObject options argument.
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup plot Plotting Interface
+@brief This section includes categories defining a function plot.
+
+
+*********************************************************************************************************************
+@defgroup plot_x11   X11 Function Plotter
+ @ingroup plot
+ @brief This category contains data structures, type definitions and functions for a function plot based on X11.
+
+ It includes data structures representing a complete plot or one data element in a plot. <br>
+ There are definitions for a linear or logarithmic scaled plot and type definitions for the structure for one data
+ element in a plot and for the use of the plotter structure. <br>
+ Additionally this category contains several functions concerning a plot, e.g. <br>
+ <ul>
+ <li> adding new data values to a plot
+ <li> clearing all data of a data element in a plot
+ <li> creating a plotting window
+ <li> saving or updating a plot
+ <li> setting the label or colour of a data element.
+ </ul>
+
+
+*********************************************************************************************************************
+@defgroup plot_export Plot Export
+ @ingroup plot
+ @brief This category contains data structures, type definitions and functions for a function plot.
+
+ It includes data structures representing a complete plot or one data element in a plot. <br>
+ There are definitions for a linear or logarithmic scaled plot and type definitions for the structure for one data
+ element in a plot and for the use of the plotter structure. <br>
+ Additionally this category contains several functions concerning a plot, e.g. <br>
+ <ul>
+ <li> adding new data values to a plot
+ <li> basic functions for hashtables
+ <li> clearing all data of a data element or all information in a plot
+ <li> creating or closing a plotting window
+ <li> saving all data to a .dat file
+ <li> setting the label of a data element
+ <li> setting the position of a legend
+ <li> setting the style or colour of a plot.
+ </ul>
+
+
+
+*********************************************************************************************************************
+*********************************************************************************************************************
+@defgroup misc Miscellaneous Helper Functions
+@brief This section includes several categories and some important functions.
+
+There are some crucial function like
+<ul>
+<li>cleaning up the initial mess structures
+<li>initializing mess
+</ul>
+and some helpful functions, e.g.
+<ul>
+<li> calculating machine precision
+<li> converting a string to lower or upper case
+<li> displaying intformation about the @openmp environment
+<li> getting a line from a file
+<li> getting information about the CPU, memory and the swap space of the system
+<li> printing memory size
+<li> removing whitespaces from the beginning and the end of a string
+<li> returning the readable name of a data, storage, symmetry or operation type value
+<li> setting a new current temporary path and generating a random filename inside this path.
+</ul>
+
+
+*********************************************************************************************************************
+@defgroup misc_hash Hashtable
+ @ingroup misc
+ @brief This category contains datastructures, type definitions and functions to handle a hashtable.
+
+ It includes functions to
+ <ul>
+ <li> create a hashtable,
+ <li> delete a hashtable,
+ <li> find, insert or remove an object in a hashtable,
+ <li> show content of a hashtable.
+ </ul>
+ Additionally there are datastructures to represent a hashtable and corresponding type definitions.
+
+
+*********************************************************************************************************************
+@defgroup misc_thpool A Compact Loader Pool Implementation
+ @ingroup misc
+ @brief This category contains several structures, type definitions and functions concerning a threadpool.
+
+ It includes structures and type definitions of a thread pool and jobs of a thread pool, implementations of the
+ loader thread and functions to create, stop and exit a thread pool or to create,
+ exit a job and to insert a task to the loader pool. <br>
+ Additionally there are functions to wait until a job is done and to check if a job is done.
+
+
+*********************************************************************************************************************
+@defgroup misc_timer Time Measurement
+ @ingroup misc
+ @brief This category contains several time measurement functions.
+
+ It includes functions to initialize or clean up a timer object. <br>
+ Additionally there are some functions to get a timer value, the current elapsed time since starting the timer
+ (and the reset of the timer) or the difference between two timers. It also
+ includes a wall-time and a cpu-time function.
+
+
+*********************************************************************************************************************
+@defgroup misc_macro     Various Macros
+ @ingroup misc
+ @brief This category contains several macros and definitions.
+
+ These macros concern the memory manager, vectors and matrices.
+
+
+*********************************************************************************************************************
+@defgroup test Software Testing
+ @brief This section contains different categories with examples to proof the correctness of certain functions.
+
+ This section contains different categories with examples to proof the
+ correctness of certain functions. The test function could also be used as
+ examples for serveral functions in @mess. The tests are categorized similar
+ to the origin of the tested functions.
+
+
+*********************************************************************************************************************
+@defgroup test_matrix Basic Matrix and Vector Operations
+ @ingroup test
+ @brief In this category implemented basic matrix and vector operations are proofed.
+
+ There are files proving the correctness of following matrix operations
+ <ul>
+ <li> add an additional zero block to a matrix
+ <li> add (computed) columns to a matrix
+ <li> add matrices
+ <li> compute a submatrix
+ <li> compute different norms of a matrix
+ <li> compute the column and row sum
+ <li> compute the Kronecker product
+ <li> compute the matrix-vector product
+ <li> compute the norm of a matrix column
+ <li> compute the rank of a matrix
+ <li> compute the trace of a matrix
+ <li> compute the vector product between a column of a matrix and a vector
+ <li> compute the (weighted) dot product between two columns of a matrix
+ <li> construct a biorthonormal basis (with respect to weighted scalar product)
+ <li> concatenate matrices
+ <li> estimate the condition number of a matrix
+ <li> get an element of a matrix
+ <li> multiplicate two matrices
+ <li> overwrite a matrix element
+ <li> overwrite a matrix row
+ <li> scale a matrix column
+ <li> transpose a matrix
+ <li> update columns of a matrix
+ </ul>
+
+ and of the following vector operations
+ <ul>
+ <li> add additional zeros to a vector
+ <li> compute the axpy scalar product.
+ </ul>
+ Additionally the calculation of the machine epsilon is proofed.
+
+
+*********************************************************************************************************************
+@defgroup test_direct Direct Solvers for Linear Systems
+ @ingroup test
+ @brief In this category implemented direct solver for linear systems are proofed.
+
+ There are files proving the correctness of the solution for
+ <ul>
+ <li> a (generalized) Lyapunov equation
+ <li> a (generalized) Sylvester equation
+ <li> a matrix valued system of linear equations
+ <li> a (shifted) system of linear equations
+ <li> the computation of the inverse of a matrix.
+ </ul>
+ Additionally function handles defined in trisolve.c are proofed.
+
+
+*********************************************************************************************************************
+@defgroup test_eigen Eigenvalue and Related Problems
+ @ingroup test
+ @brief In this category implemented files to compute eigenvalues, eigenvectors and solve related problems are proofed.
+
+ There are files proving the correctness of the solution of the eigenvalue problem using
+ <ul>
+ <li> @c DGEEV from @lapack
+ <li> the Arnoldi process
+ <li> the Lanczos process
+ <li> @c xGEEV from @lapack.
+ </ul>
+ Additionally there are files that are proving the correctness of
+ <ul>
+ <li> the computation of the largest eigenvalue
+ <li> the (economy size) singular value decomposition.
+ </ul>
+
+
+*********************************************************************************************************************
+@defgroup test_io Input/Output Operations
+ @ingroup test
+ @brief This category contains checks of different input and output operations.
+
+ In this category are files checking the correctness of input and output operations on vectors.
+
+*********************************************************************************************************************
+@defgroup test_itsolver Iterative Solvers for Linear Systems
+ @ingroup test
+ @brief In this category implemented iterative solver for linear systems are proofed.
+
+ There are files checking different iterative solver, e.g.
+ <ul>
+ <li> BICGSTAB
+ <li> CG
+ <li> GMRES
+ <li> Gauss-Seidel method
+ <li> Jacobi method
+ <li> restarted GMRES
+ <li> (symmetric) successive overrelaxation ((S)SOR)
+ </ul>
+ and different preconditioners, e.g.
+ <ul>
+ <li> diagonal preconditioner
+ <li> \f$ ILU(0) \f$ preconditioner
+ <li> \f$ ILU(k) \f$ preconditioner
+ <li> (S)SOR preconditioner
+ </ul>
+
+
+*********************************************************************************************************************
+@defgroup test_lrcfadi Low-Rank Methods for Matrix Equations
+ @ingroup test
+ @brief This category contains checks of low-rank methods for different matrix equations.
+
+ There are files proving the correctness of the solution for
+ <ul>
+ <li> generalized Riccati Equations arising from a Hessenberg index DAE system using LRCF-NM
+ <li> (generalized) Riccati Equations using LRCF-NM
+ <li> Lyapunov Equations arising from a second order system
+ <li> Lyapunov Equations using the LRCF-ADI method
+ <li> Riccati Equations arising from a second order system
+ </ul>
+ and checking function handles for Hessenberg index 2 DAE  and second order systems.
+
+
+*********************************************************************************************************************
+@defgroup test_format Storage Formats
+ @ingroup test
+ @brief This category contains checks of conversions to different storage formats.
+
+ In this category are files that proof the correct conversion
+ <ul>
+ <li> from a @c C \f$ 2 \f$ dimensional array to a dense mess_matrix
+ <li> from a @c cholmod_dense or @c cholmod_sparse datastructure to a dense or @ref MESS_CSC @ref mess_matrix storage format (and vice versa)
+ <li> from an arbitrary @ref mess_matrix storage format to another @ref mess_matrix storage format
+ <li> to a @ref MESS_CSC, @ref MESS_CSR or @ref MESS_COORD @ref mess_matrix.
+ </ul>
+ There is also a file checking the correctness of the computed view on a matrix.
+
+*********************************************************************************************************************
+
+*********************************************************************************************************************
+@defgroup test_misc  Miscellaneous Functions and Functions Related to Vectors
+ @ingroup test
+ @brief This category contains checks for misscellaneous function and function related to vectors.
+
+ In this category are files that checks the correctness of
+ <ul>
+ <li> @ref mess_vector_perm_inplace
+ </ul>
+
+
+*********************************************************************************************************************
+
+
+
+ */

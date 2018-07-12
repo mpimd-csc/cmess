@@ -1,0 +1,150 @@
+==The files==
+mor.bib:
+Contains anything model order reduction related including
+applications. Papers on helper problems like solvers for matrix
+Lyapunov equations do NOT belong here.
+
+software.bib:
+This is the resource for anything software related. Mostly manuals and
+WWW references go here.
+
+csc.bib:
+Everything else goes in here.
+
+
+Note that these files are supposed to be disjoint!
+
+All files are located in the group SVN under
+http://svncsc.mpi-magdeburg.mpg.de/repos/mpcsc/pubs/bibfiles/
+
+The formating of the files is the one produced by emacs in
+BibTeX-mode. Use the emacs menu 
+   Bibtex-Edit -> Operation on Buffer ->
+
+   	       -> Validate Entries
+	       -> Sort Entries
+	       -> Reformat Entries
+
+to ensure you have the proper formatting. 
+If you can not use emacs:
+ - Sorting is performed according to the bibtex keys.
+ - try to adapt the formating found in the other entries.
+ 
+JabRef can be used to do the sorting, but will destroy the formating
+of the entries. 
+
+MOST IMPORTANTLY:
+When checking in your changes to the SVN repository, please make sure 
+you give a meaningful log message telling which entries have been added, 
+upated or whatever. Since not everyone is using emacs the formatting of the 
+entries and their sorting will change depending on the editor and it will
+be almost impossible to keep track of the actual changes otherwise.
+
+==Comparing multiple bib-files==
+If you need to compare (e.g. to merge them) two bibfiles.
+It is a good idea to use the same editor (preferably emacs using the
+above) to ensure the same sorting and formating in both files and then
+use a graphical diff tool (e.g. mgdiff, kdiff3, xxdiff,...) to check
+for the differences. Most of those tools can perform merge operations
+already. Currently (summer 2011) these tools are not automatically
+installed on our computers, so you need to ask the IT to install one
+on yours. 
+
+==Naming schemes and entry format rules==
+
+===Publication types===
+When in doubt about a publication type try to discuss it here and on
+the group mailing list.
+
+===Preprint handling==
+Enter a new preprint as TechReport with all the data as on the corresponding
+Preprint server.
+Add 
+type = {Preprint}
+
+Once submitted add:
+ note = {Submitted to }
+and change this to
+ note = {To appear in }
+on acceptance. 
+
+When the final paper has appeared add it as a separate entry with own
+bibtex key. 
+Then remove the TechReport from the database!
+
+=== Other Technical reports==
+Entries for technical report should have a type entry to distinguish them from submitted preprints:
+
+type = {Technical reports}
+
+or 
+
+a more detailed description, e.g.
+
+type = {SLICOT Working Note},
+
+
+ArXiv entries should be written as TechReport with the following entries:
+ author, title, month, year
+ type        =   {arXiv e-prints},
+ institution =	 {Cornell University},
+ number      =   {xxxxxxxxvx},    % i.e. eprint + version
+ note        =   {math.NA}          % optionally, the primaryClass
+
+
+
+===BibTeX Keys===
+Bibtex keys for the entries are formed from the authors name(s) and
+the year of publication as in 
+
+  3 leading characters of first authors last name (Xxx)
+ +1 leading character of second and third atuhros last names (YZ)
+ +year of publication as 2 digits (11)
+ +1 additional character for counting if the previous is non-unique
+
+In the mor.bib file an additional leading mor is added.
+ 
+examples:
+Xxx08, XxxYZ10, XxxYZ10a, XxxYZ10b
+examples mor.bib:
+morXxx08, morXxxYZ10, morXxxYZ10a, morXxxYZ10b
+
+===author fields===
+First names are abbreviated by 1character. In case of multiple first
+names, these are separated by a single empty space or secured space (~).
+Multiple authors are separated by an and.
+
+example:
+author = {J. F. Kennedy and F. D. Roosevelt}
+author = {Kennedy, J.~F. and Roosevelt, F.~D.}
+author = {M. {Van~Barel}}
+
+===booktitle fields===
+Since Bibtex Strings and standard entries can not be combined be sure
+to meet the String format and add the special information such as , e.g.,
+years, or numbers in case of conference Proceedings
+
+===publisher, journal, month fields===
+Make sure you check the list of BibTex Strings and use existing
+strings here or add new ones where necessary. 
+
+Follow the list of the AMS for Mathematical reviews available at: 
+ http://www.ams.org/msnhtml/serials.pdf
+for new entries
+
+Use three-letter abbreviations without quotes for months like
+month = mar,
+month = jun,
+
+===pages===
+Page ranges should be given with double dashes
+
+example:
+ pages = {102--110}
+
+===German Umlaut and other special characters===
+Always use LaTeX transcription for any of these characters to avoid
+problems with differing file encodings. 
+examples 
+ ä -> \"{a}
+ ß -> {\ss}

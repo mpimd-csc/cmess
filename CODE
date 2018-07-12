@@ -1,0 +1,22 @@
+name: Matrix Equations Sparse Solvers 
+shortname: C-M.E.S.S.
+version: 1.0.0
+release-date: 2018-07-06
+id-type: doi
+id: 10.5281/zenodo.1302966
+authors: Martin Köhler, Jens Saak, Peter Benner
+orcids: 0000-0003-2338-9904, 0000-0001-5567-963, 0000-0003-3362-4103
+topic: large sparse matrix equations
+type: C-library
+license: GPL v2
+license-type: Open
+repository: private development / public releases
+repository-type: git
+languages: C, Fortran, Python, MATLAB, Julia
+dependencies: cmake(>=3.0.2), blas, lapack, suitesparse, bzip2, zlib, lzma(optional),
+              arpack(optional), matio(optional), numpy/scipy(optional),
+              superlu(optional)
+systems: Posix compatible
+website: https://gitlab.mpi-magdeburg.mpg.de/mess/cmess-releases
+keywords: symmetric matrix equations, LR-ADI, Newton Kleinman, Lyapunov Equation,
+ Riccati Equation

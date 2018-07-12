@@ -1,0 +1,2 @@
+FILE(GLOB _SRC *.cc)
+SET(SRC ${SRC} ${_SRC} PARENT_SCOPE)

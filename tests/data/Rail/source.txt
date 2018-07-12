@@ -1,0 +1,11 @@
+MODEL DESCRIBTION CAN BE FOUND IN
+
+@MastersThesis{Saa03,
+author = {J. Saak},
+title = {Effiziente numerische {L}"osung eines {O}ptimalsteuerungsproblems f"ur die {A}bk"uhlung von Stahlprofilen},
+school = {Fachbereich 3/Mathematik und Informatik,
+Universit"at Bremen},
+year = {2003},
+type = {Diplomarbeit},
+address = {D-28334 Bremen},
+month = sep }

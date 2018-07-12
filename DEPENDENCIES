@@ -1,0 +1,69 @@
+DEPENDENCIES
+============
+
+
+Required Libraries          |  Minimum Version
+----------------------------+----------------------
+CMake                       |       3.0.2
+suitesparse                 |       3.7.1
+bzip2                       |       1.0.6
+zlib                        |       1.2.8
+liblzma                     |       5.1.1
+LAPACK                      |       3.2.1
+BLAS                        |        -
+
+
+Optional Libraries          |  Minimum Version
+----------------------------+----------------------
+ARPACK                      |       3.1.5
+MAT File I/O Library        |       1.5.2
+SuperLU                     |       3.0
+SuperLU_MT                  |       3.0
+OpenMP                      |       2.5
+
+
+Optional Executables and    |
+Packages                    |   Minimum Version
+----------------------------+--------------------
+Doxygen                     |       1.8.11
+genhtml                     |       1.12
+lcov                        |       1.12
+gcov                        |       5.4.0
+valgrind                    |       3.11.0
+cppcheck                    |       1.76
+cppcheck-htmlreport         |        -
+cmake-lint                  |       1.3.4.1
+
+
+Required Packages for       |
+Python Interface            |  Minimum Version
+----------------------------+----------------------
+Python                      |       2.7
+NumPy                       |       1.6.0
+SciPy                       |       0.16
+
+
+Optional Packages for       |
+Python Documentation        |   Minimum Version
+----------------------------+---------------------
+Sphinx                      |       1.3.6
+sphinxcontrib-bibtex        |       0.3.5
+numpydoc                    |       0.6.0
+matplotlib                  |       1.5.1
+pylint                      |       1.6.5
+
+
+TESTED MATLAB VERSIONS FOR MEX-M.E.S.S.:
+    * matlab2017a
+    * matlab2016b
+    * matlab2015b
+    * matlab2014b
+    * matlab2013b
+
+
+cmake-lint is available at:
+    * https://github.com/richq/cmake-lint
+    * https://pypi.org/project/cmakelint/
+    * https://pypi.python.org/pypi/cmakelint/1.3.4.1
+
+

@@ -1,0 +1,133 @@
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (C) Peter Benner, Martin Koehler, Jens Saak and others
+#               2009-2018
+#
+
+from setuptools import setup, Extension, find_packages
+from glob import glob
+import os
+
+
+module1 = Extension(
+                    'pymess._c_interface',
+
+                    extra_compile_args = [
+                        '-g',
+                        '-Wno-declaration-after-statement',
+                        '-Wno-error=declaration-after-statement',
+                    ],
+
+                    language  = 'c',
+
+                    runtime_library_dirs = ['$ORIGIN/.libs'],
+
+                    extra_link_args = ['-g'],
+
+                    include_dirs = [
+                        ${PYMESS_INCLUDE_LIST},
+                        '${CMAKE_CURRENT_SOURCE_DIR}'
+                    ],
+
+                    libraries = [
+                        ${PYMESS_LIBRARY_LIST},
+                        'pthread',
+                        'm'
+                    ],
+
+                    library_dirs = [
+                        ${PYMESS_LIBRARY_PATH_LIST}
+                    ],
+
+                    # only relative paths
+                    sources =   glob("c_interface/conv/eqn/*.c")    +    \
+                                glob("c_interface/conv/*.c")        +    \
+                                glob("c_interface/functions/*.c")   +    \
+                                glob("c_interface/*.c")                  \
+
+                )
+
+descr='Python interface to the C-M.E.S.S. library'
+
+setup(
+        name ='pymess',
+
+        version ='${MESS_VERSION}',
+
+        description = descr,
+
+        long_description = descr,
+
+        url = 'http://www.mpg-magdeburg.mpg.de/projects/mess',
+
+        author = ['Peter Benner', 'Peter Benner, Martin Koehler','Maximilian Behr','Jens Saak', 'Nitin Prasad'],
+
+        license = 'GPLv2+',
+
+        classifiers = [
+
+            'Development Status :: 5 - Production/Stable',
+
+            'Environment :: Console',
+
+            'Intended Audience :: Education',
+            'Intended Audience :: Science/Research',
+
+            'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
+
+            'Natural Language :: English',
+
+            'Operating System :: MacOS :: MacOS X',
+            'Operating System :: POSIX :: Linux',
+
+            'Programming Language :: C',
+            'Programming Language :: Fortran',
+            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.3',
+            'Programming Language :: Python :: 3.4',
+            'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
+
+            'Topic :: Scientific/Engineering :: Mathematics',
+        ],
+
+        keywords = 'Matrix Equations Py-M.E.S.S. pymess C-M.E.S.S. cmess',
+
+        ext_modules = [module1],
+
+        # absolute paths are not allowed use relative paths
+        package_dir = { 'pymess':'pymess'},
+
+        packages=['pymess', 'pymess.equations'],
+
+        # add libmess_python*.{so,dylib} to package data
+        package_data={
+        '': ['.libs/*.so','.libs/*.dylib',
+            ],
+        },
+
+        include_package_data = True,
+
+        install_requires=['numpy>=1.6.0', 'scipy>=0.16.0'],
+
+        # this is the right place for tests matrices ect.
+        data_files = [("", ["COPYING"])],
+
+        zip_safe = False,
+  )
+
+

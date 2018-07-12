@@ -1,0 +1,16 @@
+Triple Chain Instance generated with Matlab Function triplechain_MSD available in the M.M.E.S.S. toolbox.
+
+Matlab function for triple chain mass spring damper model following the model in
+
+
+N.Truhar and K.Veselic
+An efficient method for estimating the optimal dampers' viscosity for
+linear vibrating systems using Lyapunov Equations
+SIAM J. Matriax Anal. Appl. vol.31 no.1 pp 18-39
+
+
+parameters:
+n1=100;
+alpha=2;
+beta=5;
+v=5;

@@ -1,0 +1,40 @@
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (C) Peter Benner, Martin Koehler, Jens Saak and others
+#               2009-2018
+#
+
+
+# .coveragerc to control coverage.py
+[run]
+branch = True
+
+# include the unittest source files and source files in installed modules
+source = @PYMESS_OUTPUT_DIR@
+         pymess
+
+
+
+omit = *__init__*
+
+
+[report]
+precision = 2
+
+
+[html]
+title = "Coverage Report for Py-M.E.S.S."
+directory = source = @PYMESS_OUTPUT_DIR@/coverage
+

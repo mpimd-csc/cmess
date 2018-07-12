@@ -1,0 +1,35 @@
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (C) Peter Benner, Martin Koehler, Jens Saak and others
+#               2009-2018
+#
+
+
+FILE(GLOB _CMESS_SRC *.c)
+
+LIST(REMOVE_ITEM _CMESS_SRC "${CMAKE_CURRENT_SOURCE_DIR}/shellsort.c")
+
+SET(CMESS_SRC ${CMESS_SRC} ${_CMESS_SRC} PARENT_SCOPE)
+
+
+SET(_CMESS_FSRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/gemm_dense_sparse_pp.f90
+    ${CMAKE_CURRENT_SOURCE_DIR}/gemm_sparse_dense_pp.f90
+    )
+
+SET(CMESS_FSRC ${CMESS_FSRC} ${_CMESS_FSRC} PARENT_SCOPE)
+
+
+

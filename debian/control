@@ -1,0 +1,48 @@
+Source: libmess
+Priority: optional
+Maintainer: Martin Koehler <koehlerm@mpi-magdeburg.mpg.de>
+Build-Depends: debhelper (>= 9.0.0), cmake ( >= 3.0.2), libopenblas-dev, libsuitesparse-dev, zlib1g-dev, libbz2-dev,
+ liblzma-dev, libarpack2-dev, libmatio-dev, doxygen, graphviz,
+ gfortran
+Standards-Version: 3.9.8
+Section: math
+Homepage: http://www.mpi-magdeburg.mpg.de/projects/mess
+#Vcs-Git: git://git.debian.org/collab-maint/cmess.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/cmess.git;a=summary
+
+Package: libmess-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Description: Documentation for libmess - M.E.S.S. Matrix Equation Sparse Solver
+ M.E.S.S. - the Matrix Equation Sparse Solver library, is the successor to the
+ Lyapack  Toolbox for MATLAB/Octave. It is available as a MATLAB toolbox as well
+ as a C library. It is intended for solving large sparse matrix equations as
+ well as problems from  model order reduction and optimal control. The C version
+ provides a large set of auxiliary subroutines for sparse matrix computations
+ and efficient usage of modern multicore workstations.
+
+Package: libmess-dev
+Section: libdevel
+Architecture: any
+Depends: libmess (= ${binary:Version}), ${misc:Depends}
+Description: Development files for libmess - M.E.S.S. Matrix Equation Sparse Solver
+ M.E.S.S. - the Matrix Equation Sparse Solver library, is the successor to the
+ Lyapack  Toolbox for MATLAB/Octave. It is available as a MATLAB toolbox as well
+ as a C library. It is intended for solving large sparse matrix equations as
+ well as problems from  model order reduction and optimal control. The C version
+ provides a large set of auxiliary subroutines for sparse matrix computations
+ and efficient usage of modern multicore workstations.
+
+Package: libmess
+Section: math
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: runtime library for libmess - M.E.S.S. Matrix Equations Sparse Solver
+ M.E.S.S. - the Matrix Equation Sparse Solver library, is the successor to the
+ Lyapack  Toolbox for MATLAB/Octave. It is available as a MATLAB toolbox as well
+ as a C library. It is intended for solving large sparse matrix equations as
+ well as problems from  model order reduction and optimal control. The C version
+ provides a large set of auxiliary subroutines for sparse matrix computations
+ and efficient usage of modern multicore workstations.
+

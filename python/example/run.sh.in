@@ -1,0 +1,60 @@
+#!/bin/bash
+
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (C) Peter Benner, Martin Koehler, Jens Saak and others
+#               2009-2018
+#
+
+set -e
+
+# set python interpreter
+PYTHONINTERP=@PYTHON_EXECUTABLE@
+
+# examples for easy interface
+$PYTHONINTERP pymess_lyap.py
+$PYTHONINTERP pymess_care.py
+$PYTHONINTERP pymess_sylvester_sparsedense.py
+$PYTHONINTERP pymess_gmpare.py
+
+# example for standard equation
+$PYTHONINTERP pymess_lradi.py
+$PYTHONINTERP pymess_lrnm.py
+
+# example for SO1
+$PYTHONINTERP pymess_lradi_so1.py
+$PYTHONINTERP pymess_lrnm_so1.py
+
+# example for SO2
+$PYTHONINTERP pymess_lradi_so2.py
+$PYTHONINTERP pymess_lrnm_so2.py
+
+# example for DAE1
+$PYTHONINTERP pymess_lradi_dae1.py
+$PYTHONINTERP pymess_lrnm_dae1.py
+
+# example for DAE2
+$PYTHONINTERP pymess_lradi_dae2.py
+$PYTHONINTERP pymess_lrnm_dae2.py
+
+# example for callback
+$PYTHONINTERP pymess_callback.py
+
+# example for glyap
+$PYTHONINTERP pymess_glyap.py
+
+# example for gstein
+$PYTHONINTERP pymess_gstein.py
+

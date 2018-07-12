@@ -1,0 +1,67 @@
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (C) Peter Benner, Martin Koehler, Jens Saak and others
+#               2009-2018
+#
+
+
+
+# - Build details for MESS:  Matrix Equations Sparse Solver
+#
+# This file has been automatically generated.
+
+
+# Package found
+set(MESS_FOUND TRUE)
+
+# Compilers
+set(MESS_CXX_COMPILER "@CMAKE_CXX_COMPILER@")
+set(MESS_C_COMPILER "@CMAKE_C_COMPILER@")
+set(MESS_Fortran_COMPILER "@CMAKE_Fortran_COMPILER@")
+
+
+# Compiler defintions
+set(MESS_CXX_DEFINITIONS "-DMESS_VERSION=\"@MESS_VERSION@\";@MESS_CXX_DEFINITIONS@")
+set(MESS_C_DEFINITIONS "-DMESS_VERSION=\"@MESS_VERSION@\";@MESS_C_DEFINITIONS@")
+
+# Compiler flags
+set(MESS_CXX_FLAGS "@CMAKE_CXX_FLAGS@")
+set(MESS_C_FLAGS "@CMAKE_C_FLAGS@")
+
+
+# Linker flags
+set(MESS_LINK_FLAGS "@CMAKE_EXE_LINKER_FLAGS@")
+
+# Include directories
+set(MESS_INCLUDE_DIRS "@CMAKE_INSTALL_PREFIX@/@MESS_INCLUDE_DIR@")
+
+# Third party include directories
+set(MESS_3RD_PARTY_INCLUDE_DIRS "@MESS_INCLUDE_DIRECTORIES@")
+
+# MESS library
+set(MESS_LIBRARIES "@MESS_LIBRARY@")
+
+# Third-party library directories
+#set(MESS_3RD_PARTY_LIBRARY_DIR "@MESS_TARGET_LINK_LIBRARIES_DIRS@")
+
+# Third-party libraries
+set(MESS_3RD_PARTY_LIBRARIES "@MESS_TARGET_LINK_LIBRARIES@")
+
+# Version
+set(MESS_MAJOR_VERSION "@MESS_MAJOR_VERSION@")
+set(MESS_MINOR_VERSION "@MESS_MINOR_VERSION@")
+set(MESS_PATCH_VERSION "@MESS_PATCH_VERSION@")
+set(MESS_VERSION_STR   "@MESS_VERSION@")
+
